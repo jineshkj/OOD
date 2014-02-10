@@ -5,37 +5,30 @@ using namespace std;
 
 ostream& operator<<(ostream& os, CLIOptions& options)
 {
-	if (options._path.size() == 0)
-	{
-		os << "Path missing" << endl;
-	}
-	else
-	{
-		os << "Path      : " << options._path << endl;
-	}
+	os << "CLI Options" << endl;
+	os << "===========" << endl;
+	os << endl;
 
+	os << "Root      : " << (options._root.size() ? options._root : "<MISSING>") << endl;
+
+	os << "Patterns  : ";
 	if (options._patterns.size() == 0)
 	{
-		os << "Patterns missing" << endl;
+		os << "<MISSING>";
 	}
 	else
 	{
-		os << "Patterns  : ";
 		for (auto &pat : options._patterns)
-		{
 			os << '[' << pat << ']' << " ";
-		}
-
-		os << endl;
 	}
+	os << endl;
 
 	os << "Recursive : " << (options._recurse ? "yes" : "no") << endl;
 	os << "Compact   : " << (options._compact ? "yes" : "no") << endl;
+	os << endl;
 
 	if (options._error.size() > 0)
-	{
 		os << "Error: " << options._error << endl;
-	}
 
 	return os;
 }
@@ -64,10 +57,13 @@ bool CLIOptions::ProcessSwitch(const string& sw)
 
 void CLIOptions::SetPath(const FilePath& path)
 {
-	_path = path;
+	_root = path;
 }
 
 void CLIOptions::AddPattern(const FilePattern& pattern)
 {
-	_patterns.insert(_patterns.begin(), pattern);
+	_patterns.insert(_patterns.end(), pattern);
+
+	if (!_complete && _root.size())
+		_complete = true;
 }

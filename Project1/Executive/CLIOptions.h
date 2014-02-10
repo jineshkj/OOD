@@ -16,12 +16,14 @@
 #include <string>
 #include <ostream>
 
+#include "FileManager.h"
+
 class CLIOptions
 {
 public:
-	using FilePath = std::string;
-	using FilePattern = std::string;
-	using FilePatterns = std::set<FilePattern>;
+	using FilePath = FileManager::FilePath;
+	using FilePattern = FileManager::FilePattern;
+	using FilePatterns = FileManager::FilePatterns;
 
 	CLIOptions() : 
 		_recurse(false), _compact(false), _complete(false)
@@ -29,7 +31,7 @@ public:
 
 	operator bool() const { return !_error.size() && _complete;  }
 
-	const FilePath& path() const { return _path; }
+	const FilePath& path() const { return _root; }
 	const FilePatterns& patterns() const { return _patterns; }
 	bool recursive() const { return _recurse; }
 	bool compact() const { return _compact; }
@@ -39,7 +41,7 @@ public:
 	void AddPattern(const FilePattern& pattern);
 
 private:
-	FilePath _path;
+	FilePath _root;
 	FilePatterns _patterns;
 
 	bool _recurse;

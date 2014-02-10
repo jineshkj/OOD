@@ -81,10 +81,14 @@
     <ClCompile Include="CLIOptions.cpp" />
     <ClCompile Include="CLIParser.cpp" />
     <ClCompile Include="Executive.cpp" />
+    <ClCompile Include="FileManager.cpp" />
+    <ClCompile Include="FileSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CLIOptions.h" />
     <ClInclude Include="CLIParser.h" />
+    <ClInclude Include="FileManager.h" />
+    <ClInclude Include="FileSystem.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
