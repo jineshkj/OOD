@@ -15,9 +15,7 @@ void FileManager::search(const FileManager::FilePatterns& patterns)
 
 	cout << "Found " << _repo.size() << " files:" << endl;
 	for (auto &file : _repo)
-	{
 		cout << file << endl;
-	}
 }
 
 void FileManager::search(const FilePath& rootdir, const FileManager::FilePatterns& patterns)
@@ -29,20 +27,20 @@ void FileManager::search(const FilePath& rootdir, const FileManager::FilePattern
 		std::vector<std::string> files = Directory::getFiles(rootdir, pattern);
 
 		for (auto &file : files)
-			_repo.insert(_repo.end(), rootdir + "\\" + file);
+			_repo.push_back(rootdir + "\\" + file);
 	}
 
-	if (_recursive)
+	if (!_recursive)
+		return;
+
+	std::vector<std::string> subdirs = Directory::getDirectories(rootdir, "*");
+
+	for (auto &subdir : subdirs)
 	{
-		std::vector<std::string> subdirs = Directory::getDirectories(rootdir, "*");
+		/* do not try recursing into . and .. directories */
+		if (subdir == "." || subdir == "..")
+			continue;
 
-		for (auto &subdir : subdirs)
-		{
-			/* do not try recursing into . and .. directories */
-			if (subdir == "." || subdir == "..")
-				continue;
-
-			FileManager::search(rootdir + "\\" + subdir, patterns);
-		}
+		FileManager::search(rootdir + "\\" + subdir, patterns);
 	}
 }

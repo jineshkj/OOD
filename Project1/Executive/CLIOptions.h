@@ -12,7 +12,6 @@
 #ifndef CLIOPTIONS_H
 #define CLIOPTIONS_H
 
-#include <set>
 #include <string>
 #include <ostream>
 

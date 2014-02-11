@@ -80,15 +80,28 @@
   <ItemGroup>
     <ClCompile Include="CLIOptions.cpp" />
     <ClCompile Include="CLIParser.cpp" />
+    <ClCompile Include="CPPAnalyzer.cpp" />
     <ClCompile Include="Executive.cpp" />
     <ClCompile Include="FileManager.cpp" />
     <ClCompile Include="FileSystem.cpp" />
+    <ClCompile Include="FoldingRules.cpp" />
+    <ClCompile Include="Parser.cpp" />
+    <ClCompile Include="SemiExpression.cpp" />
+    <ClCompile Include="Tokenizer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CLIOptions.h" />
     <ClInclude Include="CLIParser.h" />
+    <ClInclude Include="ConfigureParser.h" />
+    <ClInclude Include="CPPAnalyzer.h" />
+    <ClInclude Include="CPPRules.h" />
     <ClInclude Include="FileManager.h" />
     <ClInclude Include="FileSystem.h" />
+    <ClInclude Include="FoldingRules.h" />
+    <ClInclude Include="ITokCollection.h" />
+    <ClInclude Include="Parser.h" />
+    <ClInclude Include="SemiExpression.h" />
+    <ClInclude Include="Tokenizer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

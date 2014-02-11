@@ -3,6 +3,7 @@
 #define FILEMANAGER_H
 
 #include <set>
+#include <vector>
 #include <string>
 
 class FileManager
@@ -11,7 +12,7 @@ public:
 	using FilePath = std::string;
 	using FilePattern = std::string;
 	using FilePatterns = std::set<FilePattern>;
-	using FileRepository = std::set<FilePath>;
+	using FileRepository = std::vector<FilePath>;
 
 	FileManager(const FilePath& root, bool recursive) : 
 		_root(root), _recursive(recursive)
