@@ -4,6 +4,7 @@
 #include "CLIParser.h"
 #include "FileManager.h"
 #include "CPPAnalyzer.h"
+#include "Display.h"
 
 using namespace std;
 
@@ -38,39 +39,31 @@ int main(int argc, const char *argv[])
 	// ConfigureParser 
 
 	CPPAnalyzer analyzer;
+    Display display(std::cout);
 
 	for (auto &file : manager.repo())
 	{
-      analyzer.parse(file);
+      std::cout << file << std::endl;
+      for (auto &ch : file)
+        std::cout << '=';
+      std::cout << std::endl;
+
+      ScopeNode * maxFunc = analyzer.parse(file);
+
+      if (maxFunc != NULL)
+      {
+        std::cout << "Most complex function : " << maxFunc->value() << std::endl;
+        display.output(maxFunc);
+        delete maxFunc;
+
+      } else
+      {
+        std::cout << "No methods detected." << std::endl;
+      }
 	}
 
-#if 0
-	ConfigParseToConsole configure;
-	Parser* pParser = configure.Build();
-
-	if (pParser)
-	{
-		for (auto &file : manager.repo())
-		{
-			cout << "File: " << file << endl;
-			if (!configure.Attach(file))
-			{
-				std::cout << "\n  could not open file " << file << std::endl;
-				continue;
-			}
-
-			while (pParser->next())
-				pParser->parse();
-
-			cout << endl;
-		}
-	}
-	else
-	{
-		std::cout << "\n\n  Parser not built\n\n";
-		return 1;
-	}
-#endif
+    cout << "Press [ENTER] to continue..." << endl;
+    getchar();
 
 	return 0;
 }

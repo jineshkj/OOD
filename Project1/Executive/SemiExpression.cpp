@@ -5,7 +5,8 @@
 //  Language:      Visual C++ 2008, SP1                            //
 //  Platform:      Dell Precision T7400, Vista Ultimate SP1        //
 //  Application:   Prototype for CSE687 Pr1, Sp09                  //
-//  Author:        Jim Fawcett, CST 4-187, Syracuse University     //
+//  Author:        Jinesh Jayakumar                                //
+//  Source:        Jim Fawcett, CST 4-187, Syracuse University     //
 //                 (315) 443-3948, jfawcett@twcny.rr.com           //
 //                                                                 //
 //  Jim Fawcett (c) copyright 2013                                 //
@@ -113,6 +114,18 @@ size_t SemiExp::find(const std::string& tok)
   for(size_t i=0; i<length(); ++i)
     if(tok == toks[i])
       return i;
+  return length();
+}
+//
+//----< is tok found in semi-expression from back? >---------------------
+
+size_t SemiExp::rfind(const std::string& tok)
+{
+  for (size_t i = length(); i > 0; i--)
+  {
+    if (tok == toks[i-1])
+      return (i-1);
+  }
   return length();
 }
 //----< remove tok if found in semi-expression >---------------

@@ -53,6 +53,10 @@ bool Parser::parse()
   bool succeeded = false;
   for(size_t i=0; i<rules.size(); ++i)
   {
+    // for (int j = 0; j < (*pTokColl).length(); j++)
+    //  std::cout << '[' << (*pTokColl)[j] << ']';
+    // std::cout << std::endl;
+
     if (rules[i]->doTest(pTokColl))
     {
       switch (rules[i]->doActions(pTokColl))
@@ -69,7 +73,6 @@ bool Parser::parse()
         return false;
       }
     }
-
   }
   return succeeded;
 }
@@ -96,7 +99,7 @@ IAction::ActionStatus IRule::doActions(ITokCollection*& pTokColl)
     }      
   }
 
-  return IAction::ACT_SUCC_CONT;
+  return status;
 }
 
 //----< test stub >--------------------------------------------

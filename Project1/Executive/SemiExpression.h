@@ -7,7 +7,8 @@
 //  Language:      Visual C++ 2008, SP1                            //
 //  Platform:      Dell Precision T7400, Vista Ultimate SP1        //
 //  Application:   Prototype for CSE687 Pr1, Sp09                  //
-//  Author:        Jim Fawcett, CST 4-187, Syracuse University     //
+//  Author:        Jinesh Jayakumar                                //
+//  Source:        Jim Fawcett, CST 4-187, Syracuse University     //
 //                 (315) 443-3948, jfawcett@twcny.rr.com           //
 //                                                                 //
 //  Jim Fawcett (c) copyright 2013                                 //
@@ -57,6 +58,8 @@
 
   Maintenance History:
   ====================
+  ver 2.1 : 12 Feb 14
+  - added rfind()
   ver 2.1 : 09 Jun 11
   - added support for selecting whether to return newlines (true by default)
   ver 2.0 : 02 Jun 11
@@ -97,6 +100,7 @@ public:
   size_t length();
   std::string& operator[](int n);
   size_t find(const std::string& tok);
+  size_t rfind(const std::string& tok);
   void push_back(const std::string& tok);
   bool remove(const std::string& tok);
   bool remove(size_t i);

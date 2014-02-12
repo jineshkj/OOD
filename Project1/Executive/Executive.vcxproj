@@ -81,6 +81,7 @@
     <ClCompile Include="CLIOptions.cpp" />
     <ClCompile Include="CLIParser.cpp" />
     <ClCompile Include="CPPAnalyzer.cpp" />
+    <ClCompile Include="Display.cpp" />
     <ClCompile Include="Executive.cpp" />
     <ClCompile Include="FileManager.cpp" />
     <ClCompile Include="FileSystem.cpp" />
@@ -88,6 +89,7 @@
     <ClCompile Include="Parser.cpp" />
     <ClCompile Include="SemiExpression.cpp" />
     <ClCompile Include="Tokenizer.cpp" />
+    <ClCompile Include="XmlWriter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CLIOptions.h" />
@@ -95,13 +97,16 @@
     <ClInclude Include="ConfigureParser.h" />
     <ClInclude Include="CPPAnalyzer.h" />
     <ClInclude Include="CPPRules.h" />
+    <ClInclude Include="Display.h" />
     <ClInclude Include="FileManager.h" />
     <ClInclude Include="FileSystem.h" />
     <ClInclude Include="FoldingRules.h" />
     <ClInclude Include="ITokCollection.h" />
+    <ClInclude Include="MNode.h" />
     <ClInclude Include="Parser.h" />
     <ClInclude Include="SemiExpression.h" />
     <ClInclude Include="Tokenizer.h" />
+    <ClInclude Include="XmlWriter.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
