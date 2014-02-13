@@ -6,7 +6,7 @@ using namespace std;
 ostream& operator<<(ostream& os, CLIOptions& options)
 {
 	os << "CLI Options" << endl;
-	os << "===========" << endl;
+	os << "-----------" << endl;
 	os << endl;
 
 	os << "Root      : " << (options._root.size() ? options._root : "<MISSING>") << endl;

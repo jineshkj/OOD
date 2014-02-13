@@ -23,7 +23,10 @@ int Executive::run()
   _disp.stream() << options;
 
   if (!options)
+  {
+    _disp.PrintUsage();
     return -1;
+  }    
   
   _disp.PauseForUser();
 
@@ -43,7 +46,7 @@ int Executive::run()
     _disp.output(elements, options.compact());
   }
 
-  _disp.PauseForUser();
+  //_disp.PauseForUser();
 
   return 0;
 }

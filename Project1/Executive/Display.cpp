@@ -6,9 +6,19 @@ using namespace std;
 void Display::PrintBanner()
 {
   _os << "       Scope Analyzer version 1.0       " << endl;
-  _os << "  Copyright (c) Jinesh Jayakumar, 2014  " << endl;
+  _os << "  Copyright (c) 2014, Jinesh Jayakumar  " << endl;
   _os << "========================================" << endl;
 
+  _os << endl;
+}
+
+void Display::PrintUsage()
+{
+  _os << "Usage: Executive [OPTIONS] <root> <pattern>..." << endl;
+  _os << endl;
+  _os << "Options:" << endl;
+  _os << "    /b - display less function details" << endl;
+  _os << "    /s - search files recursively" << endl;
   _os << endl;
 }
 

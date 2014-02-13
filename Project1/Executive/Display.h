@@ -12,6 +12,7 @@ public:
   { }
 
   void PrintBanner();
+  void PrintUsage();
   void output(ElementList& elements, bool compact);
 
   void PauseForUser()
