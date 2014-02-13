@@ -5,7 +5,9 @@
 
 #include <map>
 #include <stack>
+#include <vector>
 #include <sstream>
+#include <memory>
 
 #include "FileManager.h"
 
@@ -19,6 +21,7 @@
 #include "ScopeStack.h"
 
 using ScopeNode = TMTree::MNode<std::string>;
+using MethodScopes = std::pair< std::shared_ptr<ScopeNode>, size_t >; // holds method scopes and its complexity
 
 ///////////////////////////////////////////////////////////////
 // ScopeStack element is application specific
@@ -28,7 +31,10 @@ struct element
   std::string type;
   std::string name;
   size_t startLine, endLine;
+  MethodScopes methodScopes; // set only for methods
 };
+
+using ElementList = std::vector<element>;
 
 ///////////////////////////////////////////////////////////////
 // Repository instance is used to share resources
@@ -36,10 +42,11 @@ struct element
 
 class Repository  // application specific
 {
-  ScopeStack<element> stack;
   Toker* p_Toker;
-  std::map<std::string, ScopeNode*> _methodStats;
+
+  ScopeStack<element> stack;
   std::stack<ScopeNode*> _methodStack;
+  ElementList _elements; // stores completed scopes
 
 public:
   Repository(Toker* pToker)
@@ -58,13 +65,17 @@ public:
   {
     return (size_t)(p_Toker->lines());
   }
-  std::map<std::string, ScopeNode*>& methStats()
+  ElementList& elements()
   {
-    return _methodStats;
+    return _elements;
   }
   std::stack<ScopeNode*>& methStack()
   {
     return _methodStack;
+  }
+  void clear()
+  {
+    _elements.clear();
   }
 };
 
@@ -81,16 +92,18 @@ public:
   }
   ActionStatus doAction(ITokCollection*& pTc)
   {
+    ITokCollection& tc = *pTc;
     element elem;
-    elem.type = "unknown";
-    elem.name = "anonymous";
+    elem.type = "anonymous";
+    elem.name = tc[0];
     elem.startLine = p_Repos->lineCount();
     p_Repos->scopeStack().push(elem);
 
-    ScopeNode *scope = new ScopeNode(elem.name);
-
+    // Btw, we don't expect any anonymous scopes outside a method
     if (p_Repos->methStack().size() > 0)
     {
+      ScopeNode *scope = new ScopeNode(elem.name);
+
       p_Repos->methStack().top()->addChild(scope);
       p_Repos->methStack().push(scope);
     } else
@@ -126,9 +139,18 @@ public:
     elem.startLine = p_Repos->lineCount();
     p_Repos->scopeStack().push(elem);
 
-    ScopeNode *scope = new ScopeNode(elem.name);
-    p_Repos->methStack().top()->addChild(scope);
-    p_Repos->methStack().push(scope);
+    // Btw, we don't expect any keyword scopes outside a method
+    if (p_Repos->methStack().size() > 0)
+    {
+      ScopeNode *scope = new ScopeNode(elem.name);
+
+      p_Repos->methStack().top()->addChild(scope);
+      p_Repos->methStack().push(scope);
+    }
+    else
+    {
+      std::cerr << "BUG: PushKeyword called for a scope outside method" << std::endl;
+    }
 
     return ACT_SUCC_STOP;
   }
@@ -173,23 +195,29 @@ public:
 
     name += (*pTc)[close_brace - 1];
 
-    element elem;
-    elem.type = "function";
-    elem.name = name;
-    elem.startLine = p_Repos->lineCount();
-    p_Repos->scopeStack().push(elem);
-
     ScopeNode *topNode = NULL;
     while (p_Repos->methStack().size())
     {
+      if (p_Repos->methStack().size() == 1) // print error only once
+        std::cout << "BUG:: method detected inside another. nested methods not supported." << std::endl;
+
       topNode = p_Repos->methStack().top();
       p_Repos->methStack().pop();
     }
     delete topNode;
 
-    ScopeNode *funcNode = new ScopeNode(elem.name);
-    p_Repos->methStats()[elem.name] = funcNode;
+    ScopeNode *funcNode = new ScopeNode(name);
     p_Repos->methStack().push(funcNode);
+
+    element elem;
+    elem.type = "function";
+    elem.name = name;
+    elem.startLine = p_Repos->lineCount();
+
+    elem.methodScopes.first.reset(funcNode);
+    elem.methodScopes.second = 0;
+
+    p_Repos->scopeStack().push(elem);
 
     return ACT_SUCC_STOP;
   }
@@ -282,6 +310,9 @@ public:
 class PopScope : public IAction
 {
   Repository* p_Repos;
+
+  int count(ScopeNode * node);
+
 public:
   PopScope(Repository* pRepos)
   {
@@ -295,10 +326,14 @@ public:
     element elem = p_Repos->scopeStack().pop();
     elem.endLine = p_Repos->lineCount();
 
-    if (p_Repos->methStack().size())
+    if (p_Repos->methStack().size() > 0) // method stack will be empty when we are outside a function
       p_Repos->methStack().pop();
+    
+    // now that the method scope has ended, compute its complexity
+    if (elem.type == "function")
+      elem.methodScopes.second = count(elem.methodScopes.first.get());
 
-    std::cout << std::setw(10) << elem.type << std::setw(5) << elem.startLine << " - " << std::setw(2) << elem.endLine << std::setw(15) << elem.name << std::endl;
+    p_Repos->elements().push_back(elem);
 
     return ACT_SUCC_STOP;
   }
@@ -312,7 +347,7 @@ public:
     CPPAnalyzer();
 	//~CPPParser();
 
-	ScopeNode* parse(const FilePath& file);
+	ElementList& parse(const FilePath& file);
 
 private:
 
@@ -323,7 +358,7 @@ private:
 
 	// add folding rules
 
-	FoldingRules _foldingRules;
+    codeFoldingRules _foldingRules;
 
 	// add Rules and Actions
     SpecialKeyword _rSpecialKeyword;
@@ -346,8 +381,6 @@ private:
 
     EndOfScope _rEndOfScope;
     PopScope _aPop;
-
-    int count(ScopeNode * node);
 };
 
 #endif // CPPANALYZER_H

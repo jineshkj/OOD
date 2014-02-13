@@ -4,66 +4,46 @@
 #include "CLIParser.h"
 #include "FileManager.h"
 #include "CPPAnalyzer.h"
-#include "Display.h"
+
+#include "Executive.h"
 
 using namespace std;
 
-void PrintBanner()
-{
-	cout << "       Scope Analyzer version 1.0       " << endl;
-	cout << "  Copyright (c) Jinesh Jayakumar, 2014  " << endl;
-	cout << "----------------------------------------" << endl;
-
-	cout << endl;
+Executive::Executive(int argc, char *argv[]) : 
+    _argc(argc), _argv(argv), _disp(std::cout)
+{ 
 }
 
-int main(int argc, const char *argv[])
+int Executive::run()
 {
-	PrintBanner();
+  _disp.PrintBanner();
 
-	CLIOptions options = CLIParser::parse(argc, argv);
+  CLIOptions options = CLIParser::parse(_argc, _argv);
 
-	cout << options << endl;
-	if (!options)
-		exit(-1);
+  _disp.stream() << options;
 
-	cout << "Press [ENTER] to continue..." << endl;
-	getchar();
+  if (!options)
+    return -1;
+  
+  _disp.PauseForUser();
 
-	FileManager manager(options.path(), options.recursive());
-	manager.search(options.patterns());
+  FileManager manager(options.path(), options.recursive(), _disp.stream());
+  manager.search(options.patterns());
 
-	cout << "Press [ENTER] to continue..." << endl;
-	getchar();
+  _disp.PauseForUser();
 
-	// ConfigureParser 
+  CPPAnalyzer analyzer;
 
-	CPPAnalyzer analyzer;
-    Display display(std::cout);
+  for (auto &file : manager.repo())
+  {
+    _disp.DisplayHeading(file);
 
-	for (auto &file : manager.repo())
-	{
-      std::cout << file << std::endl;
-      for (auto &ch : file)
-        std::cout << '=';
-      std::cout << std::endl;
+    ElementList& elements = analyzer.parse(file);
 
-      ScopeNode * maxFunc = analyzer.parse(file);
+    _disp.output(elements);
+  }
 
-      if (maxFunc != NULL)
-      {
-        std::cout << "Most complex function : " << maxFunc->value() << std::endl;
-        display.output(maxFunc);
-        delete maxFunc;
+  _disp.PauseForUser();
 
-      } else
-      {
-        std::cout << "No methods detected." << std::endl;
-      }
-	}
-
-    cout << "Press [ENTER] to continue..." << endl;
-    getchar();
-
-	return 0;
+  return 0;
 }

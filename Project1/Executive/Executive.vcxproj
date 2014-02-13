@@ -86,6 +86,7 @@
     <ClCompile Include="FileManager.cpp" />
     <ClCompile Include="FileSystem.cpp" />
     <ClCompile Include="FoldingRules.cpp" />
+    <ClCompile Include="Main.cpp" />
     <ClCompile Include="Parser.cpp" />
     <ClCompile Include="SemiExpression.cpp" />
     <ClCompile Include="Tokenizer.cpp" />
@@ -98,6 +99,7 @@
     <ClInclude Include="CPPAnalyzer.h" />
     <ClInclude Include="CPPRules.h" />
     <ClInclude Include="Display.h" />
+    <ClInclude Include="Executive.h" />
     <ClInclude Include="FileManager.h" />
     <ClInclude Include="FileSystem.h" />
     <ClInclude Include="FoldingRules.h" />

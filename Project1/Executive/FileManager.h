@@ -2,6 +2,8 @@
 #ifndef FILEMANAGER_H
 #define FILEMANAGER_H
 
+#include <ostream>
+
 #include <set>
 #include <vector>
 #include <string>
@@ -14,8 +16,8 @@ public:
 	using FilePatterns = std::set<FilePattern>;
 	using FileRepository = std::vector<FilePath>;
 
-	FileManager(const FilePath& root, bool recursive) : 
-		_root(root), _recursive(recursive)
+	FileManager(const FilePath& root, bool recursive, std::ostream& disp) : 
+      _root(root), _recursive(recursive), _disp(disp)
 	{ }
 
 	const FileRepository& repo() const { return _repo; }
@@ -25,6 +27,7 @@ public:
 private:
 	FilePath _root;
 	bool _recursive;
+    std::ostream& _disp;
 
 	FileRepository _repo;
 

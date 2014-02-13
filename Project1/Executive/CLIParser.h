@@ -7,7 +7,7 @@
 class CLIParser
 {
 public:
-	static CLIOptions parse(int argc, const char *argv[]);
+	static CLIOptions parse(int argc, char *argv[]);
 
 private:
 	static bool IsASwitch(const char *arg) { return arg[0] == '/'; }

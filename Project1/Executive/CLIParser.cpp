@@ -2,7 +2,7 @@
 #include "CLIParser.h"
 #include <iostream>
 
-CLIOptions CLIParser::parse(int argc, const char *argv[])
+CLIOptions CLIParser::parse(int argc, char **argv)
 {
 	CLIOptions options;
 

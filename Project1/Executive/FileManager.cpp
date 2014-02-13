@@ -1,46 +1,44 @@
 
-#include <iostream>
-
 #include "FileSystem.h"
 
 #include "FileManager.h"
 
-using namespace std;
 using namespace FileSystem;
 
 void FileManager::search(const FileManager::FilePatterns& patterns)
 {
-	cout << "Scanning directories: " << endl;
-	FileManager::search(Path::getFullFileSpec(_root), patterns);
+  _disp << "Scanning directories: " << std::endl;
 
-	cout << "Found " << _repo.size() << " files:" << endl;
-	for (auto &file : _repo)
-		cout << file << endl;
+  FileManager::search(Path::getFullFileSpec(_root), patterns);
+
+  _disp << "Found " << _repo.size() << " files:" << std::endl;
+  for (auto &file : _repo)
+    _disp << file << std::endl;
 }
 
 void FileManager::search(const FilePath& rootdir, const FileManager::FilePatterns& patterns)
 {
-	cout << rootdir << endl;
+  _disp << rootdir << std::endl;
 
-	for (auto &pattern : patterns)
-	{
-		std::vector<std::string> files = Directory::getFiles(rootdir, pattern);
+  for (auto &pattern : patterns)
+  {
+	std::vector<std::string> files = Directory::getFiles(rootdir, pattern);
 
-		for (auto &file : files)
-			_repo.push_back(rootdir + "\\" + file);
-	}
+	for (auto &file : files)
+	  _repo.push_back(rootdir + "\\" + file);
+  }
 
-	if (!_recursive)
-		return;
+  if (!_recursive)
+	return;
 
-	std::vector<std::string> subdirs = Directory::getDirectories(rootdir, "*");
+  std::vector<std::string> subdirs = Directory::getDirectories(rootdir, "*");
 
-	for (auto &subdir : subdirs)
-	{
-		/* do not try recursing into . and .. directories */
-		if (subdir == "." || subdir == "..")
-			continue;
+  for (auto &subdir : subdirs)
+  {
+	/* do not try recursing into . and .. directories */
+	if (subdir == "." || subdir == "..")
+	  continue;
 
-		FileManager::search(rootdir + "\\" + subdir, patterns);
-	}
+	FileManager::search(rootdir + "\\" + subdir, patterns);
+  }
 }
