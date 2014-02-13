@@ -14,7 +14,7 @@ int PopScope::count(ScopeNode * node)
   return c;
 }
 
-CPPAnalyzer::CPPAnalyzer() : _semi(&_toker), _parser(&_semi), _repo(&_toker),
+CPPAnalyzer::CPPAnalyzer(ElementList& elements) : _semi(&_toker), _parser(&_semi), _repo(&_toker, elements),
 _aPushKeyword(&_repo), _aPushFunction(&_repo), _aPushTemplate(&_repo), _aPushEnclosure(&_repo), _aPushEnum(&_repo), _aPush(&_repo), _aPop(&_repo)
 {
 	//_toker.returnComments();
@@ -50,7 +50,7 @@ _aPushKeyword(&_repo), _aPushFunction(&_repo), _aPushTemplate(&_repo), _aPushEnc
   _parser.addRule(&_rEndOfScope);
 }
 
-ElementList& CPPAnalyzer::parse(const FilePath& file)
+size_t CPPAnalyzer::parse(const FilePath& file)
 {
   _repo.clear();
 
@@ -59,5 +59,5 @@ ElementList& CPPAnalyzer::parse(const FilePath& file)
   while (_parser.next())
 	_parser.parse();
   
-  return _repo.elements();
+  return _repo.elements().size();
 }

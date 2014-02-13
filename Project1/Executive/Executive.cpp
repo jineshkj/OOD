@@ -35,15 +35,17 @@ int Executive::run()
 
   _disp.PauseForUser();
 
-  CPPAnalyzer analyzer;
+  ElementList elements;
+  CPPAnalyzer analyzer(elements);
 
+  _disp.DisplayCompact(options.compact());
   for (auto &file : manager.repo())
   {
     _disp.DisplayHeading(file);
 
-    ElementList& elements = analyzer.parse(file);
+    analyzer.parse(file);
 
-    _disp.output(elements, options.compact());
+    _disp.output(elements);
   }
 
   //_disp.PauseForUser();

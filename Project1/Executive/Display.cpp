@@ -22,64 +22,75 @@ void Display::PrintUsage()
   _os << endl;
 }
 
-void Display::output(ElementList& elements, bool compact)
+void Display::output(ElementList& elements)
 {
   size_t maxFunComplexity = 0;
   ScopeNode * maxFun = NULL;
 
-  outputHeader();
+  _os << _tableHeading << endl;
 
   for (auto& elem : elements)
   {
     if (elem.type == "keyword" || elem.type == "anonymous")
       continue;
     
-    if (elem.type == "function")
+    if (elem.type != "function")
     {
-      outputElement(elem, true);
+      outputElement(elem);
+      continue;
+    }
 
+    // handle functions specially since we need to find also the maximum depth function
+    outputElement(elem, true);
+
+    if (!_compact)
+    {
       if (elem.methodScopes.second >= maxFunComplexity)
       {
         maxFunComplexity = elem.methodScopes.second;
         maxFun = elem.methodScopes.first.get();
       }
-    } else 
-    {
-      outputElement(elem);
     }
+
   }
 
-  _os << endl;
-
-  if (!compact)
+  if (!_compact)
   {
     if (maxFun != NULL)
     {
-      _os << "*** Most complex function '" << maxFun->value() << "' has complexity of " << maxFunComplexity << " ***" << endl;
+      _os << "*** XML for '" << maxFun->value() << "' with complexity " << maxFunComplexity << " ***" << endl;
       outputXml(maxFun);
     }
     else
     {
       _os << "***** No function found in this file *****" << endl;
     }
-
-    _os << endl;
   }
-  
-  _os << endl;
+
+  DisplayLine('=');
+
+  _os << endl << endl;
 }
 
-void Display::outputHeader()
+void Display::outputTableHeading()
 {
-  _os << setw(10) << "type" << setw(10) << "start" << " - " << setw(5) << "end" << setw(45) << "name" << setw(5) << "comp" << endl;
+  _os << _tableHeading << endl;
+  DisplayLine('-');
 }
 
-void Display::outputElement(element& elem, bool dispComplexity)
+void Display::outputElement(element& elem, bool isFunction)
 {
-  _os << setw(10) << elem.type << setw(10) << elem.startLine << " - " << setw(5) << elem.endLine << setw(45) << elem.name ;
+  _os << setw(FW_TYPE) << right << elem.type;
   
-  if (dispComplexity)
-    _os << setw(5) << elem.methodScopes.second;
+  if (_compact && isFunction)
+    _os << setw(FW_START) << ' ' << setw(FW_END+3) << left << (elem.endLine - elem.startLine + 1);
+  else
+    _os << setw(FW_START) << elem.startLine << " - " << setw(FW_END) << left << elem.endLine;
+    
+  _os << setw(FW_NAME) << elem.name ;
+  
+  if (isFunction)
+    _os << setw(FW_NODES) << elem.methodScopes.second;
 
   _os << endl;
 }

@@ -46,10 +46,10 @@ class Repository  // application specific
 
   ScopeStack<element> stack;
   std::stack<ScopeNode*> _methodStack;
-  ElementList _elements; // stores completed scopes
+  ElementList& _elements; // stores completed scopes
 
 public:
-  Repository(Toker* pToker)
+  Repository(Toker* pToker, ElementList& elements) : _elements(elements)
   {
     p_Toker = pToker;
   }
@@ -344,10 +344,10 @@ class CPPAnalyzer
 public:
 	using FilePath = FileManager::FilePath;
 
-    CPPAnalyzer();
+    CPPAnalyzer(ElementList& elements);
 	//~CPPParser();
 
-	ElementList& parse(const FilePath& file);
+	size_t parse(const FilePath& file);
 
 private:
 
