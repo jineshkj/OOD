@@ -40,7 +40,7 @@ int Executive::run()
 
     ElementList& elements = analyzer.parse(file);
 
-    _disp.output(elements);
+    _disp.output(elements, options.compact());
   }
 
   _disp.PauseForUser();

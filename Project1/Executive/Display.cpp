@@ -12,7 +12,7 @@ void Display::PrintBanner()
   _os << endl;
 }
 
-void Display::output(ElementList& elements)
+void Display::output(ElementList& elements, bool compact)
 {
   size_t maxFunComplexity = 0;
   ScopeNode * maxFun = NULL;
@@ -41,16 +41,22 @@ void Display::output(ElementList& elements)
 
   _os << endl;
 
-  if (maxFun != NULL)
+  if (!compact)
   {
-    _os << "*** Most complex function '" << maxFun->value() << "' has complexity of " << maxFunComplexity << " ***" << endl;
-    outputXml(maxFun);
-  } else
-  {
-    _os << "***** No function found in this file *****" << endl;
-  }
+    if (maxFun != NULL)
+    {
+      _os << "*** Most complex function '" << maxFun->value() << "' has complexity of " << maxFunComplexity << " ***" << endl;
+      outputXml(maxFun);
+    }
+    else
+    {
+      _os << "***** No function found in this file *****" << endl;
+    }
 
-  _os << endl << endl;
+    _os << endl;
+  }
+  
+  _os << endl;
 }
 
 void Display::outputHeader()
@@ -91,5 +97,5 @@ bool Display::ScopeToXml(XmlWriter& wrt, ScopeNode * node)
 
   wrt.end();
 
-  return node;
+  return true;
 }
