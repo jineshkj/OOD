@@ -44,6 +44,8 @@
 
   Maintenance History:
   ====================
+  ver 1.4 : 12 Feb 2014
+  - Added status for actions
   ver 1.3 : 02 Jun 11
   - added use of folding rules in get();
   ver 1.2 : 17 Jan 09

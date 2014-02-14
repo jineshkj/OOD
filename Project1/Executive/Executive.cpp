@@ -1,3 +1,13 @@
+//////////////////////////////////////////////////////////////////////////
+//    Executive.cpp - source file for Executive class                   //
+//    version 1.0                                                       //
+//                                                                      //
+//    Language     - C++                                                //
+//    Platform     - Windows 7                                          //
+//    Application  - CIS 687 OOD Project 1                              //
+//    Author       - Jinesh Jayakumar <jkunnath@syr.edu>                //
+//                                                                      //
+//////////////////////////////////////////////////////////////////////////
 
 #include <iostream>
 
@@ -9,10 +19,14 @@
 
 using namespace std;
 
-Executive::Executive(int argc, char *argv[]) : 
+//----< Executive class constructor >------------
+
+Executive::Executive(int argc, char *argv[]) :
     _argc(argc), _argv(argv), _disp(std::cout)
 { 
 }
+
+//----< the main routine of Executive class >------------
 
 int Executive::run()
 {
@@ -20,8 +34,10 @@ int Executive::run()
 
   CLIOptions options = CLIParser::parse(_argc, _argv);
 
+  // print out options for user to verify
   _disp.stream() << options;
 
+  // in case of error, we display usage and exit with error
   if (!options)
   {
     _disp.PrintUsage();

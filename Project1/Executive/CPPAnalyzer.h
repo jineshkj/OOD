@@ -1,6 +1,66 @@
 #ifndef CPPANALYZER_H
 #define CPPANALYZER_H
 
+//////////////////////////////////////////////////////////////////////////
+//    CPPAnalyzer.h - header file for CPPAnalyzer class  and actions    //
+//                    for various CPPRules                              //
+//    version 1.0                                                       //
+//                                                                      //
+//    Language     - C++                                                //
+//    Platform     - Windows 7                                          //
+//    Application  - CIS 687 OOD Project 1                              //
+//    Author       - Jinesh Jayakumar <jkunnath@syr.edu>                //
+//                                                                      //
+//////////////////////////////////////////////////////////////////////////
+/*
+Module Operations:
+==================
+This module provides the following classes:
+ - CPPAnalyzer
+ - element
+ - Repository
+ - PushAnonymous
+ - PushKeyword
+ - PushFunction
+ - PushTemplate
+ - PushEnclosure
+ - PushEnum
+ - PopScope
+
+All the above classes except CPPAnalyzer and element are internal to the
+CPPAnalyzer module and is not really useful for extenal components.
+
+CPPAnalyzer class provides support for parsing a given source file and 
+converting the information into a list of elements represented by the
+type ElementList.
+
+Public Interface (CPPAnalyzer):
+===============================
+CPPAnalyzer(ElementList& elements);
+size_t parse(const FilePath& file);
+
+ElementList elements;
+CPPAnalyzer analyser(elements);
+
+size_t count = analyzer.parser("Parser.cpp");
+std::cout << "Analyzed and found " << count << " elements << std::endl;
+
+Required Files:
+===============
+FileManager.h, Parser.h, Tokenizer.h, FoldingRules.h, 
+SemiExpression.h, MNode.h, CPPRules.h, ScopeStack.h
+
+Build Command:
+==============
+cl /EHa /DTEST_CPPANALYZER CPPAnalyzer.cpp
+
+Maintenance History:
+====================
+ver 1.0 : 12 Feb 2014
+- first release
+
+*/
+
 #include <iomanip>
 
 #include <map>
@@ -45,7 +105,7 @@ class Repository  // application specific
   Toker* p_Toker;
 
   ScopeStack<element> stack;
-  std::stack<ScopeNode*> _methodStack;
+  std::stack<ScopeNode*> _methodStack; // used to create proper tree for methods
   ElementList& _elements; // stores completed scopes
 
 public:
@@ -167,6 +227,10 @@ public:
   {
     p_Repos = pRepos;
   }
+
+  // finding function name is a bit tricky since the function name to be
+  // proper, we also need to include the class name (if present). we try
+  // to keep function names as accurate as possible.
   ActionStatus doAction(ITokCollection*& pTc)
   {
     // push function scope
@@ -174,6 +238,7 @@ public:
 
     size_t close_brace = pTc->find("(");
 
+    // look for a double colon (::) so that we can extract the class name
     if ((close_brace >= 2) && (*pTc)[close_brace - 2] == "::")
     {
       if (close_brace >= 3)
@@ -181,8 +246,11 @@ public:
       name += "::";
     }
 
+    // handle destructor methods specially since we need to 
+    // include the tilde (~) in the name of the function
     if ((close_brace >= 2) && (*pTc)[close_brace - 2] == "~")
     {
+      // look for a double colon (::) so that we can extract the class name
       if ((close_brace >= 3) && (*pTc)[close_brace - 3] == "::")
       {
         if (close_brace >= 4)
@@ -195,6 +263,9 @@ public:
 
     name += (*pTc)[close_brace - 1];
 
+    // at this poing we dont expect to be already inside a function scope since we 
+    // do not support nested method definitions. in case this occurs, handle it 
+    // specially by popping out the outer routine's method stack.
     ScopeNode *topNode = NULL;
     while (p_Repos->methStack().size())
     {
@@ -318,6 +389,10 @@ public:
   {
     p_Repos = pRepos;
   }
+
+  // when we pop out scopes, we add it to the element list contained in the
+  // repository so that the caller of CPPAnalyzer::parse() can look at the
+  // elements.
   ActionStatus doAction(ITokCollection*& pTc)
   {
     if (p_Repos->scopeStack().size() == 0)
@@ -345,7 +420,6 @@ public:
 	using FilePath = FileManager::FilePath;
 
     CPPAnalyzer(ElementList& elements);
-	//~CPPParser();
 
 	size_t parse(const FilePath& file);
 

@@ -1,7 +1,19 @@
+//////////////////////////////////////////////////////////////////////////
+//    Display.cpp - source file for Display class                       //
+//    version 1.0                                                       //
+//                                                                      //
+//    Language     - C++                                                //
+//    Platform     - Windows 7                                          //
+//    Application  - CIS 687 OOD Project 1                              //
+//    Author       - Jinesh Jayakumar <jkunnath@syr.edu>                //
+//                                                                      //
+//////////////////////////////////////////////////////////////////////////
 
 #include "Display.h"
 
 using namespace std;
+
+//----< print application banner >------------
 
 void Display::PrintBanner()
 {
@@ -12,6 +24,8 @@ void Display::PrintBanner()
   _os << endl;
 }
 
+//----< print application usage help >------------
+
 void Display::PrintUsage()
 {
   _os << "Usage: Executive [OPTIONS] <root> <pattern>..." << endl;
@@ -21,6 +35,8 @@ void Display::PrintUsage()
   _os << "    /s - search files recursively" << endl;
   _os << endl;
 }
+
+//----< output all the given elements to the configured ostream >------------
 
 void Display::output(ElementList& elements)
 {
@@ -72,11 +88,15 @@ void Display::output(ElementList& elements)
   _os << endl << endl;
 }
 
+//----< print table heading >------------
+
 void Display::outputTableHeading()
 {
   _os << _tableHeading << endl;
   DisplayLine('-');
 }
+
+//----< print out a single element >------------
 
 void Display::outputElement(element& elem, bool isFunction)
 {
@@ -95,6 +115,8 @@ void Display::outputElement(element& elem, bool isFunction)
   _os << endl;
 }
 
+//----< convert a ScopeNode to xml and write to the ostream object >------------
+
 void Display::outputXml(ScopeNode * node)
 {
   XmlWriter wrt;
@@ -107,16 +129,50 @@ void Display::outputXml(ScopeNode * node)
   _os << wrt.xml() << std::endl;
 }
 
+//----< convert a ScopeNode to an XML representation >------------
+
 bool Display::ScopeToXml(XmlWriter& wrt, ScopeNode * node)
 {
   if (node == NULL) return false;
 
   wrt.start(node->value());
-
+  
+  // make sure that we start with all marks cleared and also clear mark
+  // when exiting so that future calls will not be affected
   node->clearMarks();
   while (ScopeToXml(wrt, node->nextUnmarkedChild()));
+  node->clearMarks();
 
   wrt.end();
 
   return true;
 }
+
+//----< test stub >--------------------------------------------
+
+#ifdef TEST_DISPLAY
+#include <iostream>
+
+#include "Display.h"
+#include "CLIParser.h"
+
+int main(int argc, char *argv[])
+{
+  Display disp(std::cout);
+  disp.DisplayCompact(true);
+
+  disp.stream() << "Manual output" << std::endl;
+
+  ElementList elements;
+  CPPAnalyzer analyzer(elements);
+
+  disp.DisplayHeading(argv[1]);
+
+  analyzer.parse(argv[1]);
+  disp.output(elements);
+
+  disp.DisplayLine();
+
+  return 0;
+}
+#endif

@@ -95,7 +95,6 @@
   <ItemGroup>
     <ClInclude Include="CLIOptions.h" />
     <ClInclude Include="CLIParser.h" />
-    <ClInclude Include="ConfigureParser.h" />
     <ClInclude Include="CPPAnalyzer.h" />
     <ClInclude Include="CPPRules.h" />
     <ClInclude Include="Display.h" />

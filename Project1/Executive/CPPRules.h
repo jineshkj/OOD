@@ -1,6 +1,57 @@
 #ifndef CPPRULES_H
 #define CPPRULES_H
 
+//////////////////////////////////////////////////////////////////////////
+//    CPPRules.h - header file for various specializations of IRule     //
+//                 specific for CPP language                            //
+//    version 1.0                                                       //
+//                                                                      //
+//    Language     - C++                                                //
+//    Platform     - Windows 7                                          //
+//    Application  - CIS 687 OOD Project 1                              //
+//    Author       - Jinesh Jayakumar <jkunnath@syr.edu>                //
+//    Source       - Jim Fawcett, CST 4-187, Syracuse University        //
+//                   (315) 443-3948, jfawcett@twcny.rr.com              //
+//////////////////////////////////////////////////////////////////////////
+/*
+Module Operations:
+==================
+This module defines several action classes.  Its classes provide
+specialized services needed for specific applications.  The modules
+Parser, SemiExpression, and Tokenizer, are intended to be reusable
+without change.  This module provides a place to put extensions of
+these facilities and is not expected to be reusable.
+
+Public Interface:
+=================
+Toker t(someFile);              // create tokenizer instance
+SemiExp se(&t);                 // create a SemiExp attached to tokenizer
+Parser parser(se);              // now we have a parser
+Rule1 r1;                       // create instance of a derived Rule class
+Action1 a1;                     // create a derived action
+r1.addAction(&a1);              // register action with the rule
+parser.addRule(&r1);            // register rule with parser
+while(se.getSemiExp())          // get semi-expression
+parser.parse();               //   and parse it
+
+Build Process:
+==============
+Required files
+- Parser.h, Parser.cpp, ScopeStack.h, ScopeStack.cpp,
+ActionsAndRules.h, ActionsAndRules.cpp, ConfigureParser.cpp,
+ItokCollection.h, SemiExpression.h, SemiExpression.cpp, tokenizer.h, tokenizer.cpp
+Build commands (either one)
+- devenv CodeAnalysis.sln
+- cl /EHsc /DTEST_CPPANALYZER parser.cpp CPPAnalyzer.cpp \
+semiexpression.cpp tokenizer.cpp /link setargv.obj
+
+Maintenance History:
+====================
+ver 1.0 : 12 Feb 2014
+- first release
+
+*/
+
 #include <string>
 
 #include "ITokCollection.h"
@@ -13,8 +64,6 @@ class BeginningOfScope : public IRule
 public:
   bool doTest(ITokCollection*& pTc)
   {
-    // std::cout << "Test Beg" << std::endl;
-    //std::cout << "\n--BeginningOfScope rule";
     return (pTc->find("{") < pTc->length());
   }
 
@@ -28,8 +77,6 @@ class EndOfScope : public IRule
 public:
   bool doTest(ITokCollection*& pTc)
   {
-    // std::cout << "Test End" << std::endl;
-    //std::cout << "\n--EndOfScope rule";
     return (pTc->find("}") < pTc->length());
   }
 };
@@ -42,7 +89,6 @@ class PreprocStatement : public IRule
 public:
   bool doTest(ITokCollection*& pTc)
   {
-    //std::cout << "\n--PreprocStatement rule";
     if (pTc->find("#") < pTc->length())
     {
       return true;
@@ -60,7 +106,6 @@ class TemplateDefinition : public IRule
 public:
   bool doTest(ITokCollection*& pTc)
   {
-    // std::cout << "Test Enum" << std::endl;
     ITokCollection& tc = *pTc;
     return (tc[tc.length() - 1] == "{") && (tc[0] == "template");
   }
@@ -75,8 +120,6 @@ class EnclosureDefinition : public IRule
 public:
   bool isEnclosure(const std::string& tok)
   {
-    // std::cout << "isEnc : " << tok << std::endl;
-
     const static std::string keys[]
       = { "namespace", "class", "struct", "union" };
     for (int i = 0; i < (sizeof(keys) / sizeof(keys[0])); ++i)
@@ -108,7 +151,6 @@ class EnumDefinition : public IRule
 public:
   bool doTest(ITokCollection*& pTc)
   {
-    // std::cout << "Test Enum" << std::endl;
     ITokCollection& tc = *pTc;
     return (tc[tc.length() - 1] == "{") && tc.length() >= 3 && 
            ( tc[tc.length() - 3] == "enum") ;
@@ -136,7 +178,6 @@ public:
 
   bool doTest(ITokCollection*& pTc)
   {
-    //std::cout << "Test Kw" << std::endl;
     ITokCollection& tc = *pTc;
     if (tc[tc.length() - 1] == "{")
     {
@@ -170,14 +211,12 @@ public:
 
   bool doTest(ITokCollection*& pTc)
   {
-    //std::cout << "Test Fun" << std::endl;
     ITokCollection& tc = *pTc;
     if (tc[tc.length() - 1] == "{")
     {
       size_t len = tc.find("(");
       if (len < tc.length() && !isSpecialKeyWord(tc[len - 1]))
       {
-        //std::cout << "\n--FunctionDefinition rule";
         return true;
       }
     }

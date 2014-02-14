@@ -77,9 +77,6 @@
     <ClInclude Include="SemiExpression.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ConfigureParser.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="FoldingRules.h">
       <Filter>Header Files</Filter>
     </ClInclude>
