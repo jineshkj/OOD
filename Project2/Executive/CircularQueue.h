@@ -112,7 +112,7 @@ public:
 
   bool remove(T& t)
   {
-    if (!count())
+    if (empty())
       return false;
       
 #ifdef TEST_CIRCULARQUEUE
