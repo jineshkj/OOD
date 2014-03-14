@@ -1,3 +1,4 @@
+#ifdef TEST_SLABALLOCATOR
 //////////////////////////////////////////////////////////////////////////
 //    SlabAllocator.cpp - test source file for SlabAllocator template   //
 //    version 1.0                                                       //
@@ -12,8 +13,6 @@
 //    to publish, and requires the retention of this notice.            //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-
-#ifdef TEST_SLABALLOCATOR
 
 #include <string>
 #include <iostream>

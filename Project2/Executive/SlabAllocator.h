@@ -53,6 +53,12 @@ public:
     _stor.push_back(new T[1]);
   }
 
+  ~SlabAllocator()
+  {
+    for (auto s : _stor)
+      delete[] s;
+  }
+
   size_t slot_capacity() const
   {
     return (1 << (_stor.size() - 1));
