@@ -41,11 +41,11 @@ Build Process:
 Required files
 - CircularQueue.h
 Build commands (either one)
-- cl /EHsc /DTEST_SLABALLOCATOR CircularQueue.cpp
+- cl /EHsc /DTEST_CIRCULAR CircularQueue.cpp
 
 Maintenance History:
 =====================
-ver 1.0 : 12 Mar 2014
+ver 1.0 : 13 Mar 2014
 - first release
 
 */

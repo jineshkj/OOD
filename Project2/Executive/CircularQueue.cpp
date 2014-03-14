@@ -1,5 +1,18 @@
-
 #ifdef TEST_CIRCULARQUEUE
+//////////////////////////////////////////////////////////////////////////
+//    CircularQueue.cpp - CircularQueue template test application       //
+//    version 1.0                                                       //
+//                                                                      //
+//    Language     - C++                                                //
+//    Platform     - Any                                                //
+//    Application  - CIS 687 OOD Project 2                              //
+//    Author       - Jinesh Jayakumar <jineshkj@gmail.com>              //
+//                                                                      //
+//    Jinesh Jayakumar (c) Copyright 2014                               //
+//    All rights are granted to the user except the right               //
+//    to publish, and requires the retention of this notice.            //
+//                                                                      //
+//////////////////////////////////////////////////////////////////////////
 
 #include <iostream>
 
