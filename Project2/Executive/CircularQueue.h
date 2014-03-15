@@ -41,7 +41,7 @@ Build Process:
 Required files
 - CircularQueue.h
 Build commands (either one)
-- cl /EHsc /DTEST_CIRCULAR CircularQueue.cpp
+- cl /EHsc /DTEST_CIRCULARQUEUE CircularQueue.cpp
 
 Maintenance History:
 =====================
@@ -128,6 +128,19 @@ public:
       _head = 0;
 
     return true;
+  }
+
+  int usage()
+  {
+    // -1 if low usage, 0 if normal and 1 if high
+    int pc = 100 * count() / _size;
+
+    if (pc < 25)
+      return -1;
+    else if (pc > 75)
+      return 1;
+
+    return 0; // normal when queue usage is between 25 to 75 percent
   }
 
 private:
