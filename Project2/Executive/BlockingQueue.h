@@ -92,7 +92,10 @@ public:
     while (_queue.insert(t) == false)
     {
       if (nonblock)
+      {
+        _lock.unlock();
         return false;
+      }
 
 #ifdef TEST_BLOCKINGQUEUE
       std::cout << "Inserting element " << t << ". Queue full" << std::endl;
@@ -130,10 +133,13 @@ public:
 #endif
     _lock.lock();
 
-    if (_queue.remove(t) == false)
+    while (_queue.remove(t) == false)
     {
       if (nonblock)
+      {
+        _lock.unlock();
         return false;
+      }
 
 #ifdef TEST_BLOCKINGQUEUE
       std::cout << "Removing element. Queue empty" << std::endl;
@@ -161,6 +167,11 @@ public:
     _lock.unlock();
 
     return true;
+  }
+
+  size_t empty()
+  {
+    return _queue.empty();
   }
 
 private:
