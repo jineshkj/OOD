@@ -20,10 +20,11 @@ Module Operations:
 This module defines the BlockingQueue template that can be used to
 create a circular queue of a specific type with blocking insert and
 remove operations. This template is infact a specialization of 
-CircularQueue template where all operations are non-blocking.
+CircularQueue template where all operations are non-blocking by 
+default.
 
-insert and remove operations on queue return nothing since they are
-expected to succeed upon return.
+insert and remove operations on queue return false only when the 
+nonblock parameter is true and the operation had to block
 
 Public Interface:
 =================
@@ -35,7 +36,7 @@ BlockingQueue<int> q(5);
 
 int i=1;
 while (i++)
-  q.insert(i);
+  q.insert(i); // blocking
 
 ...
 
@@ -43,7 +44,7 @@ while (i++)
 
 int i;
 while (1) {
-  q.remove(i);
+  q.remove(i); // blocking
   std::cout << i << std::endl;
 }
 
@@ -66,6 +67,10 @@ ver 1.0 : 14 Mar 2014
 
 #include "CircularQueue.h"
 
+#ifdef TEST_BLOCKINGQUEUE
+#include <iostream>
+#endif
+
 template <class T>
 class BlockingQueue
 {
@@ -77,7 +82,7 @@ public:
 
   }
 
-  void insert(const T& t)
+  bool insert(const T& t, bool nonblock = false)
   {
 #ifdef TEST_BLOCKINGQUEUE
     std::cout << "Inserting element " << t << std::endl;
@@ -86,6 +91,9 @@ public:
 
     while (_queue.insert(t) == false)
     {
+      if (nonblock)
+        return false;
+
 #ifdef TEST_BLOCKINGQUEUE
       std::cout << "Inserting element " << t << ". Queue full" << std::endl;
 #endif
@@ -111,9 +119,11 @@ public:
       _semWait.up();
 
     _lock.unlock();
+
+    return true;
   }
 
-  void remove(T& t)
+  bool remove(T& t, bool nonblock = false)
   {
 #ifdef TEST_BLOCKINGQUEUE
     std::cout << "Removing element" << std::endl;
@@ -122,6 +132,9 @@ public:
 
     if (_queue.remove(t) == false)
     {
+      if (nonblock)
+        return false;
+
 #ifdef TEST_BLOCKINGQUEUE
       std::cout << "Removing element. Queue empty" << std::endl;
 #endif
@@ -146,6 +159,8 @@ public:
       _semWait.up();
 
     _lock.unlock();
+
+    return true;
   }
 
 private:
