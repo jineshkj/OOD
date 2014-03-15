@@ -50,6 +50,10 @@ ver 1.0 : 13 Mar 2014
 
 */
 
+#ifdef TEST_CIRCULARQUEUE
+#include <iostream>
+#endif
+
 template <class T>
 class CircularQueue
 {

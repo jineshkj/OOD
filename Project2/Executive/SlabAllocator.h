@@ -44,6 +44,10 @@ ver 1.0 : 12 Mar 2014
 
 #include <vector>
 
+#ifdef TEST_SLABALLOCATOR
+#include <iostream>
+#endif
+
 template <class T>
 class SlabAllocator
 {
