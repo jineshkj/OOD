@@ -17,6 +17,8 @@
 
 #include "Mutex.h"
 
+//----< Mutex constructor >------------
+
 Mutex::Mutex()
 {
   _mutex = CreateMutex(NULL, FALSE, NULL);
@@ -25,16 +27,22 @@ Mutex::Mutex()
     throw "Failed to create windows mutex";
 }
 
+//----< Mutex destructor >------------
+
 Mutex::~Mutex()
 {
   CloseHandle(_mutex);
   _mutex = NULL;
 }
 
+//----< lock the mutex >------------
+
 bool Mutex::lock()
 {
   return WaitForSingleObject(_mutex, INFINITE) == WAIT_OBJECT_0;
 }
+
+//----< unlock the mutex >------------
 
 bool Mutex::unlock()
 {

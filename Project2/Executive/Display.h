@@ -55,22 +55,13 @@ ver 1.0 : 12 Feb 2014
 
 #include <ostream>
 #include "CPPParser.h"
+#include "ScopeAnalyzer.h"
 
 class Display
 {
 public:
-  // various field widths for each element in the table. changing value here will change
-  // both table heading and data
-  enum FieldWidth 
-  {
-    FW_TYPE  = 10,
-    FW_START = 7,
-    FW_END   = 5,
-    FW_NAME  = 45,
-    FW_NODES = 7
-  };
 
-  Display(std::ostream& stream) : _os(stream)
+  Display(std::ostream& stream) : _os(stream), _showDiff(false)
   {  }
 
   void PrintBanner();
@@ -101,11 +92,24 @@ public:
     DisplayLine();
   }
 
+  //----< return back the output stream >------------
+
   std::ostream& stream() { return _os; }
   
+  //----< set the show diff internal flag >------------
+
+  void ShowDiff(bool show)
+  {
+    _showDiff = show;
+  }
+
+  void ShowMatches(const SizedScopeList& scopelist);
 
 private:
   std::ostream& _os;
+  bool _showDiff;
+
+  void DisplayFile(const std::string& file, size_t start, size_t lines);
 };
 
 #endif // DISPLAY_H

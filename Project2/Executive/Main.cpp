@@ -11,6 +11,8 @@
 
 #include "Executive.h"
 
+#ifdef TEST_MAIN
+
 int main(int argc, char *argv[])
 {
   // any argument manipulation can go here.
@@ -21,3 +23,5 @@ int main(int argc, char *argv[])
 
   return exec.run();
 }
+
+#endif // 0/1

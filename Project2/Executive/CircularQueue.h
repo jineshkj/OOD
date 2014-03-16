@@ -54,6 +54,9 @@ ver 1.0 : 13 Mar 2014
 #include <iostream>
 #endif
 
+///////////////////////////////////////////////////////////////
+// template that implements a circular queue
+
 template <class T>
 class CircularQueue
 {
@@ -68,20 +71,28 @@ public:
     delete[] _items;
   }
 
+  //----< total storage capacity of queue >------------
+
   size_t capacity()
   {
     return _size;
   }
+
+  //----< checks for empty queue >------------
 
   bool empty()
   {
     return (_head == _tail);
   }
 
+  //----< checks for a full queue >------------
+
   bool full()
   {
     return (_tail == _size);
   }
+
+  //----< number of items present in queue >------------
 
   size_t count()
   {
@@ -93,6 +104,8 @@ public:
     else
       return _size - (_head - _tail); // capacity minus available
   }
+
+  //----< insert an item to queue >------------
 
   bool insert(const T& t)
   {
@@ -114,6 +127,8 @@ public:
     return true;
   }
 
+  //----< remove an item from queue >------------
+
   bool remove(T& t)
   {
     if (empty())
@@ -133,6 +148,8 @@ public:
 
     return true;
   }
+
+  //----< usage of queue: -1 => low, 1=> high, 0=>normal >------------
 
   int usage()
   {

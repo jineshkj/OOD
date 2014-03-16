@@ -14,7 +14,7 @@
 //----< CPPAnalyzer constructor >------------
 
 CPPParser::CPPParser() : _semi(&_toker), _parser(&_semi), _repo(_toker, _siAllocator),
-_aPushKeyword(_repo), _aPushFunction(_repo), _aPushTemplate(_repo), _aPushEnclosure(_repo), _aPushEnum(_repo), _aPush(_repo), _aPop(_repo)
+_aPushKeyword(_repo), _aPushFunction(_repo), _aPushTemplate(_repo), _aPushEnclosure(_repo), _aPushEnum(_repo), _aPush(_repo), _aPop(_repo), _aMeasureSize(_repo)
 {
   // we don't need to parse comments or look at newline tokens
   //_toker.returnComments();
@@ -25,6 +25,12 @@ _aPushKeyword(_repo), _aPushFunction(_repo), _aPushTemplate(_repo), _aPushEnclos
   _parser.addFoldingRules(&_foldingRules);
 
   // configure to manage scope
+  _rPreProc.addAction(&_aDiscard);
+  _parser.addRule(&_rPreProc);
+
+  _rSemiColon.addAction(&_aMeasureSize);
+  _parser.addRule(&_rSemiColon);
+
   _rSpecialKeyword.addAction(&_aPushKeyword);
   _parser.addRule(&_rSpecialKeyword);
 
@@ -64,7 +70,7 @@ void CPPParser::Exec(IWork * work)
 
   while (_parser.next()) // parse individual tokens
     if (_parser.parse() == false)
-      std::cout << "failed" << std::endl;
+      std::cout << "FAILED" << std::endl;
 
   info->success = true;
 }

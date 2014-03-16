@@ -18,6 +18,8 @@
 
 #include "WorkerPool.h"
 
+//----< WorkerPool constructor >------------
+
 WorkerPool::WorkerPool(const IWorker *creator, size_t qsize) :
     _inq(qsize), _outq(qsize)
 {
@@ -30,11 +32,15 @@ WorkerPool::WorkerPool(const IWorker *creator, size_t qsize) :
     _wthreads.push_back(new WorkerThread(this, creator->CreateWorker()));
 }
 
+//----< WorkerPool destructor >------------
+
 WorkerPool::~WorkerPool()
 {
   for (auto& w : _wthreads)
     delete w;
 }
+
+//----< queue a work for execution inside the pool >------------
 
 IWork* WorkerPool::exec(IWork *work)
 {
@@ -52,6 +58,8 @@ IWork* WorkerPool::exec(IWork *work)
 
   return compl;
 }
+
+//----< wait until a work gets completed or no more work to complete >------------
 
 IWork * WorkerPool::wait()
 {
@@ -93,6 +101,8 @@ retry:
   return compl;
 }
 
+//----< retrieve a work from incoming queue >------------
+
 IWork* WorkerPool::in()
 {
   IWork *work;
@@ -103,11 +113,15 @@ IWork* WorkerPool::in()
   return work;
 }
 
+//----< put a completed work to outgoing queue >------------
+
 void WorkerPool::out(IWork *work)
 {
   // Put the given work to _outq if space is available, otherwise block
   (void) _outq.insert(work);
 }
+
+//----< find number of CPU cores available >------------
 
 size_t WorkerPool::numProcessors() const
 {
@@ -118,7 +132,9 @@ size_t WorkerPool::numProcessors() const
   return info.dwNumberOfProcessors;
 }
 
-WorkerThread::WorkerThread(WorkerPool *pool, IWorker *worker) : 
+//----< WorkerThread constructor >------------
+
+WorkerThread::WorkerThread(WorkerPool *pool, IWorker *worker) :
 _pool(pool), _worker(worker), _run(1, 1), _running(true)
 {
   _thread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE) WorkerThread::entry, this, 0, NULL);
@@ -127,11 +143,15 @@ _pool(pool), _worker(worker), _run(1, 1), _running(true)
     throw "Failed to create win32 thread";
 }
 
+//----< WorkerThread destructor >------------
+
 WorkerThread::~WorkerThread()
 {
   CloseHandle(_thread);
   _thread = NULL;
 }
+
+//----< entry routine for thread >------------
 
 void WorkerThread::entry(void *arg)
 {
@@ -139,6 +159,8 @@ void WorkerThread::entry(void *arg)
 
   thr->exec();
 }
+
+//----< extry routine for worker >------------
 
 void WorkerThread::exec()
 {

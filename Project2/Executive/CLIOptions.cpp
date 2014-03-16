@@ -36,7 +36,8 @@ ostream& operator<<(ostream& os, CLIOptions& options)
   os << endl;
 
   os << "Recursive : " << (options._recurse ? "yes" : "no") << endl;
-  os << "Compact   : " << (options._compact ? "yes" : "no") << endl;
+  os << "Show Diff : " << (options._dispdiff ? "yes" : "no") << endl;
+  os << "Min Lines : " << options._minLines << endl;
   os << endl;
 
   if (options._error.size() > 0)
@@ -49,18 +50,22 @@ ostream& operator<<(ostream& os, CLIOptions& options)
 
 bool CLIOptions::ProcessSwitch(const string& sw)
 {
-  if (sw == "s")
+  if (sw == "S")
   {
 	_recurse = true;
   }
-  else if (sw == "b")
+  else if (sw == "d")
   {
-	_compact = true;
+	_dispdiff = true;
   }
-  else
+  else if (sw[0] == 'l')
+  {
+    _minLines = atoi(sw.c_str() + 1);
+
+  } else
   {
     // set an error string internally   
-	_error += "Unknown option: ";
+	_error += "Invalid usage or unknown option: ";
 	_error += sw;
 	_error += "\n";
 

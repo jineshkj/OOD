@@ -56,6 +56,9 @@ ver 1.0 : 12 Feb 2014
 
 #include "ITokCollection.h"
 
+///////////////////////////////////////////////////////////////
+// A specialization of IRule for C++ files
+
 class CPPRule : public IRule
 {
 public:
@@ -79,6 +82,7 @@ public:
     EXPR_TRY,
     EXPR_CATCH,
     EXPR_SCOPE_CLOSE,
+    EXPR_MISC,
     EXPR_MAX
   };
 };
@@ -123,6 +127,18 @@ public:
   }
 };
 
+///////////////////////////////////////////////////////////////
+// rule to detect semicolon/braceless statements
+
+class SemiColon : public CPPRule
+{
+public:
+  void *doTest(ITokCollection& tc)
+  {
+    size_t pos = tc.find(";");
+    return (void*)((pos < tc.length()) ? EXPR_MISC : EXPR_UNKNOWN);
+  }
+};
 
 ///////////////////////////////////////////////////////////////
 // rule to detect template
@@ -198,9 +214,9 @@ public:
   void * isSpecialKeyWord(const std::string& tok)
   {
     const static std::string keys[]
-      = { "for", "while", "switch", "if", "try", "catch", "do" };
+      = { "for", "while", "switch", "if", "else", "try", "catch", "do" };
     const static ExprType types[]
-      = { EXPR_FOR, EXPR_WHILE, EXPR_SWITCH, EXPR_IF, EXPR_TRY, EXPR_CATCH, EXPR_DO };
+      = { EXPR_FOR, EXPR_WHILE, EXPR_SWITCH, EXPR_IF, EXPR_ELSE, EXPR_TRY, EXPR_CATCH, EXPR_DO };
 
     for (int i = 0; i < (sizeof(keys) / sizeof(keys[0])); ++i)
     {

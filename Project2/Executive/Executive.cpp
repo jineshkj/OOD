@@ -9,15 +9,20 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
+#include <chrono>
 #include <iostream>
 
 #include "CLIParser.h"
 #include "FileManager.h"
-#include "CPPAnalyzer.h"
+#include "CPPParser.h"
+#include "WorkerPool.h"
+
+#include "ScopeAnalyzer.h"
 
 #include "Executive.h"
 
 using namespace std;
+using namespace std::chrono;
 
 //----< Executive class constructor >------------
 
@@ -51,17 +56,59 @@ int Executive::run()
 
   _disp.PauseForUser();
 
-  ElementList elements;
-  CPPAnalyzer analyzer(elements);
+  high_resolution_clock::time_point start_time = high_resolution_clock::now();
 
-  _disp.DisplayCompact(options.compact());
+  CPPParser sampleparser;
+  WorkerPool parserpool(&sampleparser);
+  SlabAllocator<ParseFile> parseAlloc;
+
+  ScopeAnalyzer sampleAnalyzer;
+  WorkerPool analyzerpool(&sampleAnalyzer);
+
+  ScopeAnalyzer::SetMinLines(options.minLines());
+  
+  size_t total_scopes = 0;
   for (auto &file : manager.repo())
   {
-    _disp.DisplayHeading(file);
+    ParseFile *work = parseAlloc.alloc();
 
-    analyzer.parse(file);
+    work->file = static_cast<const std::string*>(&file);
+    work = static_cast<ParseFile*>(parserpool.exec(work));
 
-    _disp.output(elements);
+    if (work) {
+      total_scopes += work->scopes.size();
+      analyzerpool.exec(work);
+    }
+  }
+
+  ParseFile *work;
+  while ((work = static_cast<ParseFile*>(parserpool.wait())) != NULL) {
+    total_scopes += work->scopes.size();
+    analyzerpool.exec(work);
+  }
+
+  while (analyzerpool.wait() != NULL); // wait until all analyzer workers are done
+
+  high_resolution_clock::time_point end_time = high_resolution_clock::now();
+
+  size_t total_matches = 0;
+  for (int type = 0; type < CPPRule::EXPR_MAX; type++)
+  {
+    const SizedScopeList& sl = ScopeAnalyzer::GetSizedScopeList(type);
+    total_matches += sl.matches().size();
+  }
+
+  milliseconds ms = duration_cast<milliseconds>(end_time - start_time);
+
+  _disp.stream() << "Analyzed " << total_scopes << " scopes and found " << total_matches << " matches in " << ms.count() << " milliseconds" << std::endl;
+  _disp.PauseForUser();
+
+  _disp.ShowDiff(options.showdiff());
+
+  for (int type = 0; type < CPPRule::EXPR_MAX; type++)
+  {
+    const SizedScopeList& sl = ScopeAnalyzer::GetSizedScopeList(type);
+    _disp.ShowMatches(sl);
   }
 
   //_disp.PauseForUser();

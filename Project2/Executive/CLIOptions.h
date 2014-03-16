@@ -56,6 +56,8 @@ ver 1.0 : 12 Feb 2014
 class CLIOptions
 {
 public:
+    static const int DEFAULT_MIN_LINES = 5;
+
 	using FilePath = FileManager::FilePath;
 	using FilePattern = FileManager::FilePattern;
 	using FilePatterns = FileManager::FilePatterns;
@@ -63,7 +65,7 @@ public:
     //----< CLIOptions constructor >------------
 
     CLIOptions() :
-		_recurse(false), _compact(false), _complete(false)
+      _recurse(false), _dispdiff(false), _minLines(DEFAULT_MIN_LINES)
 	{ }
 
     //----< checks validity a CLIOptions object >------------
@@ -73,7 +75,8 @@ public:
 	const FilePath& path() const { return _root; }
 	const FilePatterns& patterns() const { return _patterns; }
 	bool recursive() const { return _recurse; }
-	bool compact() const { return _compact; }
+	bool showdiff() const { return _dispdiff; }
+    int minLines() const { return _minLines; }
 
 	bool ProcessSwitch(const std::string& sw);
 	void SetPath(const FilePath& path);
@@ -84,7 +87,8 @@ private:
 	FilePatterns _patterns;
 
 	bool _recurse;
-	bool _compact;
+	bool _dispdiff;
+    int _minLines;
 
 	bool _complete; /* set to true if all mandatory options have been detected */
 	std::string _error; /* set to an error string if any error is found in processing */

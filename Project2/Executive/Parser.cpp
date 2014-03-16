@@ -78,10 +78,12 @@ bool Parser::parse()
 
 #if 0
   if (succeeded == false) {
+    std::cout << "FAILED: ";
     for (int i = 0 ; i < (*pTokColl).length() ; i++)
     {
-      std::cout << (*pTokColl)[i] << std::endl;
+      std::cout << (*pTokColl)[i] << " ";
     }
+    std::cout << std::endl;
    }
 #endif
 

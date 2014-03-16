@@ -14,6 +14,17 @@
 //  to publish, and requires the retention of this notice.         //
 //                                                                 //
 /////////////////////////////////////////////////////////////////////
+/*
+Module Purpose:
+===============
+IWork is an interface defined for all work objects to be passed into
+a worker pool.
+
+Maintenance History:
+====================
+ver 1.0 : 14 Mar 14
+- first release
+*/
 
 class IWork
 {

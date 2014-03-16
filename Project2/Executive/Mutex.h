@@ -45,6 +45,9 @@ ver 1.0 : 12 Mar 2014
 
 */
 
+///////////////////////////////////////////////////////////////
+// class that implements a Mutex
+
 class Mutex
 {
 public:

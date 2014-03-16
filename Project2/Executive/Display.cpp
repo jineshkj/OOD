@@ -9,6 +9,8 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
+#include <fstream>
+
 #include "Display.h"
 
 using namespace std;
@@ -32,8 +34,62 @@ void Display::PrintUsage()
   _os << endl;
   _os << "Options:" << endl;
   _os << "    /d - display differences between similar regions" << endl;
-  _os << "    /s - search files recursively" << endl;
+  _os << "    /l<num> - minimum number of lines required to match two scopes" << endl;
+  _os << "    /S - search files recursively" << endl;
   _os << endl;
+}
+
+//----< print matches of scopes >------------
+
+void Display::ShowMatches(const SizedScopeList& scopelist)
+{
+  for (auto& match : scopelist.matches())
+  {
+    ScopeInfo *l = match.first;
+    ScopeInfo *r = match.second;
+
+    _os << *(l->file) << " : " << l->start << "-" << (l->start + l->lines) << endl;
+    if (_showDiff)
+    {
+      DisplayLine('-');
+      DisplayFile(*(l->file), l->start, l->lines);
+    }
+    _os << *(r->file) << " : " << r->start << "-" << (r->start + r->lines) << endl;
+    if (_showDiff)
+    {
+      DisplayLine('-');
+      DisplayFile(*(r->file), r->start, r->lines);
+    }
+
+    DisplayLine('=');
+    if (_showDiff)
+      PauseForUser();
+  }
+}
+
+//----< display contents of a file within a range >------------
+
+void Display::DisplayFile(const std::string& file, size_t start, size_t lines)
+{
+  char buffer[1024];
+  ifstream ifs (file);
+
+  while (--start)
+  {
+    ifs.getline(buffer, sizeof(buffer));
+    if (ifs.eof())
+      return;
+  }
+
+  lines++;
+  while (lines)
+  {
+    ifs.getline(buffer, sizeof(buffer));
+    _os << buffer << endl;
+    if (ifs.eof())
+      return;
+    lines--;
+  }
 }
 
 //----< test stub >--------------------------------------------

@@ -22,31 +22,38 @@
 #include "SemiExpression.h"
 
 #include "CPPRules.h"
-#include "ScopeStack.h"
 
 #include "IWork.h"
 #include "IWorker.h"
 
 #include "SlabAllocator.h"
 
+///////////////////////////////////////////////////////////////
+// Structure to hold scope information after parsing
+
 struct ScopeInfo
 {
   ScopeInfo(int t = CPPRule::EXPR_UNKNOWN, ScopeInfo* paren = NULL) : 
-      type(t), parent(paren), start(0), size(0), file(NULL)
+      type(t), parent(paren), start(0), lines(0), size(0), file(NULL)
   {
   }
 
   int type;
-  size_t start, size;
+  size_t start, lines, size;
   const std::string* file;
 
   ScopeInfo *parent;
 };
 
+//----< output ScopeInfo data to a stream >------------
+
 inline std::ostream& operator<<(std::ostream& os, const ScopeInfo& si)
 {
-  return (os << "Type: " << si.type << " Start: " << si.start << " Size: " << si.size << " Parent: " << (si.parent ? si.parent->start : 0));
+  return (os << *(si.file) << ": Type: " << si.type << " Start: " << si.start << " Lines: " << si.lines << " Size: " << si.size << " Parent: " << (si.parent ? si.parent->start : 0));
 }
+
+///////////////////////////////////////////////////////////////
+// Work for CPPParser worker
 
 struct ParseFile : public IWork
 {
@@ -92,6 +99,7 @@ public:
   friend class PushEnum;
   friend class PopScope;
   friend class CPPParser;
+  friend class MeasureSize;
 
   void reset(ParseFile *work)
   {
@@ -131,6 +139,11 @@ public:
 
     _repo._scopes.push(scope);
 
+    while (scope != NULL) {
+      scope->size += tc.length(); // size of a scope is the number of token contained in it
+      scope = scope->parent; // propagate the size to parent
+    }
+
     return ACT_SUCC_STOP;
   }
 };
@@ -161,6 +174,11 @@ public:
 
     _repo._scopes.push(scope);
 
+    while (scope != NULL) {
+      scope->size += tc.length(); // size of a scope is the number of token contained in it
+      scope = scope->parent; // propagate the size to parent
+    }
+
     return ACT_SUCC_STOP;
   }
 };
@@ -186,6 +204,11 @@ public:
     scope->start = _repo._toker.lines(); // store starting line number now
 
     _repo._scopes.push(scope);
+
+    while (scope != NULL) {
+      scope->size += tc.length(); // size of a scope is the number of token contained in it
+      scope = scope->parent; // propagate the size to parent
+    }
 
     return ACT_SUCC_STOP;
   }
@@ -213,6 +236,11 @@ public:
 
     _repo._scopes.push(scope);
 
+    while (scope != NULL) {
+      scope->size += tc.length(); // size of a scope is the number of token contained in it
+      scope = scope->parent; // propagate the size to parent
+    }
+
     return ACT_SUCC_STOP;
   }
 };
@@ -239,6 +267,11 @@ public:
 
     _repo._scopes.push(scope);
 
+    while (scope != NULL) {
+      scope->size += tc.length(); // size of a scope is the number of token contained in it
+      scope = scope->parent; // propagate the size to parent
+    }
+
     return ACT_SUCC_STOP;
   }
 };
@@ -256,7 +289,6 @@ public:
   }
   ActionStatus doAction(ITokCollection& tc, void *arg)
   {
-    // ITokCollection& tc = *pTc;
     ScopeInfo * scope = _repo._siAllocator.alloc();
 
     scope->file = _repo._work->file;
@@ -265,6 +297,11 @@ public:
     scope->start = _repo._toker.lines(); // store starting line number now
 
     _repo._scopes.push(scope);
+
+    while (scope != NULL) {
+      scope->size += tc.length(); // size of a scope is the number of token contained in it
+      scope = scope->parent; // propagate the size to parent
+    }
 
     return ACT_SUCC_CONT;
   }
@@ -297,16 +334,65 @@ public:
     ScopeInfo * scope = _repo._scopes.top();
 
     _repo._scopes.pop();
-    scope->size = _repo._toker.lines() - scope->start + 1;
+    scope->lines = _repo._toker.lines() - scope->start + 1;
     _repo._work->scopes.push_back(scope);
 
-#ifdef TEST_CPPPARSER
-    std::cout << *scope << std::endl;
-#endif
+    while (scope != NULL) {
+      scope->size += tc.length(); // size of a scope is the number of token contained in it
+      scope = scope->parent; // propagate the size to parent
+    }
 
     return ACT_SUCC_STOP;
   }
 };
+
+///////////////////////////////////////////////////////////////
+// discard a statement
+
+class DiscardStatement : public IAction
+{
+public:
+  ActionStatus doAction(ITokCollection& tc, void *arg)
+  {
+    return ACT_SUCC_STOP;
+  }
+};
+
+///////////////////////////////////////////////////////////////
+// just take the statement size
+
+class MeasureSize : public IAction
+{
+  Repository& _repo;
+
+public:
+  MeasureSize(Repository& repo) : _repo(repo)
+  {
+  }
+
+  ActionStatus doAction(ITokCollection& tc, void *arg)
+  {
+    ScopeInfo * scope = _repo._siAllocator.alloc();
+
+    scope->file = _repo._work->file;
+    scope->type = (int)arg;
+    scope->parent = _repo._scopes.empty() ? NULL : _repo._scopes.top();
+    scope->start = _repo._toker.lines(); // store starting line number now
+    scope->lines = 1;
+
+    // NOTE: no need to push this to scope stack as there are no inner scopes
+
+    while (scope != NULL) {
+      scope->size += tc.length(); // size of a scope is the number of token contained in it
+      scope = scope->parent; // propagate the size to parent
+    }
+
+    return ACT_SUCC_STOP;
+  }
+};
+
+///////////////////////////////////////////////////////////////
+// the CPP parser worker to be used in WorkerPool
 
 class CPPParser : public IWorker
 {
@@ -333,6 +419,9 @@ private:
   codeFoldingRules _foldingRules;
 
   // add Rules and Actions
+  PreprocStatement _rPreProc;
+  DiscardStatement _aDiscard;
+
   SpecialKeyword _rSpecialKeyword;
   PushKeyword _aPushKeyword;
 
@@ -353,6 +442,9 @@ private:
 
   EndOfScope _rEndOfScope;
   PopScope _aPop;
+
+  SemiColon _rSemiColon;
+  MeasureSize _aMeasureSize;
 };
 
 #endif // CPPPARSER_H

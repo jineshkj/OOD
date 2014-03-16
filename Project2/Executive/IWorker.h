@@ -14,6 +14,19 @@
 //  to publish, and requires the retention of this notice.         //
 //                                                                 //
 /////////////////////////////////////////////////////////////////////
+/*
+Module Purpose:
+===============
+IWorker is an interface defined for all workers to be used within a 
+worker pool.
+
+Maintenance History:
+====================
+ver 1.0 : 14 Mar 14
+- first release
+*/
+
+#include "IWork.h"
 
 class IWorker
 {

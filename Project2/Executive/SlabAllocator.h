@@ -63,10 +63,14 @@ public:
       delete[] s;
   }
 
+  //----< retrieve capacity of current slab >------------
+
   size_t slot_capacity() const
   {
     return (1 << (_stor.size() - 1));
   }
+
+  //----< allocate a new item from slab >------------
 
   T * alloc()
   {
@@ -86,9 +90,11 @@ private:
   size_t _used;
   std::vector<T*> _stor;
 
+  //----< add a new slab and retrive address of first item >------------
+
   T * expand()
   {
-    T * new_slot = new T[_stor.size() << 1];
+    T * new_slot = new T[1 << _stor.size()];
 
     _used = 0;
     _stor.push_back(new_slot);

@@ -82,6 +82,8 @@ public:
 
   }
 
+  //----< insert an item to queue >------------
+
   bool insert(const T& t, bool nonblock = false)
   {
 #ifdef TEST_BLOCKINGQUEUE
@@ -126,6 +128,8 @@ public:
     return true;
   }
 
+  //----< remove an item from queue >------------
+
   bool remove(T& t, bool nonblock = false)
   {
 #ifdef TEST_BLOCKINGQUEUE
@@ -168,6 +172,8 @@ public:
 
     return true;
   }
+
+  //----< check if queue is empty >------------
 
   size_t empty()
   {
