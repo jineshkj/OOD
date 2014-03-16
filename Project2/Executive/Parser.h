@@ -44,6 +44,8 @@
 
   Maintenance History:
   ====================
+  ver 1.5 : 15 Mar 2014
+  - Modified IRule and IAction to pass around matching token
   ver 1.4 : 12 Feb 2014
   - Added status for actions
   ver 1.3 : 02 Jun 11
@@ -86,7 +88,7 @@ public:
   enum ActionStatus { ACT_SUCC_STOP, ACT_FAIL_STOP, ACT_SUCC_CONT, ACT_FAIL_CONT };
 
   virtual ~IAction() {}
-  virtual ActionStatus doAction(ITokCollection*& pTc) = 0;
+  virtual ActionStatus doAction(ITokCollection& tc, void *arg) = 0;
 };
 
 ///////////////////////////////////////////////////////////////
@@ -99,8 +101,8 @@ public:
 
   virtual ~IRule() {}
   void addAction(IAction* pAction);
-  IAction::ActionStatus doActions(ITokCollection*& pTc);
-  virtual bool doTest(ITokCollection*& pTc) = 0;
+  IAction::ActionStatus doActions(ITokCollection& tc, void *arg);
+  virtual void * doTest(ITokCollection& tc) = 0;
 protected:
   std::vector<IAction*> actions;
 };

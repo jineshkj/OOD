@@ -9,27 +9,12 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
-#include "CPPAnalyzer.h"
-
-//----< count number of nodes in a ScopeNode >------------
-
-int PopScope::count(ScopeNode * node)
-{
-  int c = 1;
-  ScopeNode *child;
-
-  while ((child = node->nextUnmarkedChild()) != NULL)
-    c += count(child);
-
-  node->clearMarks();
-
-  return c;
-}
+#include "CPPParser.h"
 
 //----< CPPAnalyzer constructor >------------
 
-CPPAnalyzer::CPPAnalyzer(ElementList& elements) : _semi(&_toker), _parser(&_semi), _repo(&_toker, elements),
-_aPushKeyword(&_repo), _aPushFunction(&_repo), _aPushTemplate(&_repo), _aPushEnclosure(&_repo), _aPushEnum(&_repo), _aPush(&_repo), _aPop(&_repo)
+CPPParser::CPPParser() : _semi(&_toker), _parser(&_semi), _repo(_toker, _siAllocator),
+_aPushKeyword(_repo), _aPushFunction(_repo), _aPushTemplate(_repo), _aPushEnclosure(_repo), _aPushEnum(_repo), _aPush(_repo), _aPop(_repo)
 {
   // we don't need to parse comments or look at newline tokens
   //_toker.returnComments();
@@ -40,7 +25,6 @@ _aPushKeyword(&_repo), _aPushFunction(&_repo), _aPushTemplate(&_repo), _aPushEnc
   _parser.addFoldingRules(&_foldingRules);
 
   // configure to manage scope
-
   _rSpecialKeyword.addAction(&_aPushKeyword);
   _parser.addRule(&_rSpecialKeyword);
 
@@ -65,38 +49,53 @@ _aPushKeyword(&_repo), _aPushFunction(&_repo), _aPushTemplate(&_repo), _aPushEnc
 
 //----< parse a given CPP source or header file >------------
 
-size_t CPPAnalyzer::parse(const FilePath& file)
+void CPPParser::Exec(IWork * work)
 {
-  // clear repository so that the previous file's element list
-  // gets empty
-  _repo.clear();
+  // NOTE: Can use dynamic cast to be more safe
+  ParseFile *info = static_cast<ParseFile*>(work);
 
-  _toker.attach(file, true);
+  _repo.reset(info);
+
+  if (_toker.attach(*(info->file), true) == false)
+  {
+    info->success = false;
+    return;
+  }
 
   while (_parser.next()) // parse individual tokens
-	_parser.parse();
-  
-  return _repo.elements().size();
+    if (_parser.parse() == false)
+      std::cout << "failed" << std::endl;
+
+  info->success = true;
 }
 
 //----< test stub >--------------------------------------------
 
-#ifdef TEST_CPPANALYZER
+#ifdef TEST_CPPPARSER
 #include <iostream>
 
-#include "Display.h"
-#include "CLIParser.h"
+#include "WorkerPool.h"
 
-int main(int argc, char *argv[])
+void main()
 {
-  Display disp(std::cout);
+  CPPParser sample;
+  WorkerPool pool(&sample);
 
-  ElementList elements;
-  CPPAnalyzer analyzer(elements);
+  ParseFile parse;
+  parse.file = new std::string("..\\Executive\\CPPParser.cpp");
 
-  analyzer.parse(file);
-  disp.output(elements);
+  IWork * w = pool.exec(&parse);
 
-  return 0;
+  if (!w)
+    w = pool.wait();
+
+  if (w)
+  {
+    ParseFile * comp = static_cast<ParseFile*>(w);
+
+    std::cout << "success : " << comp->success << std::endl;
+  }
+
 }
+
 #endif

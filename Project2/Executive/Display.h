@@ -54,8 +54,7 @@ ver 1.0 : 12 Feb 2014
 */
 
 #include <ostream>
-#include "CPPAnalyzer.h"
-#include "XmlWriter.h"
+#include "CPPParser.h"
 
 class Display
 {
@@ -72,11 +71,10 @@ public:
   };
 
   Display(std::ostream& stream) : _os(stream)
-  { DisplayCompact(false); }
+  {  }
 
   void PrintBanner();
   void PrintUsage();
-  void output(ElementList& elements);
 
   //----< waits for user to press an ENTER key >------------
 
@@ -105,34 +103,9 @@ public:
 
   std::ostream& stream() { return _os; }
   
-  //----< sets output mode to compact >------------
-
-  void DisplayCompact(bool compact = false)
-  {
-    using namespace std;
-
-    _compact = compact;
-
-    // we compute the table heading and keep as an optimization
-    std::ostringstream tableHeading;
-
-    if (_compact)
-      tableHeading << setw(FW_TYPE) << right << "TYPE" << setw(FW_START + FW_END + 3) << left << "   LINES/SIZE" << setw(FW_NAME) << "NAME" << setw(FW_NODES) << "COMPL";
-    else
-      tableHeading << setw(FW_TYPE) << right << "TYPE" << setw(FW_START + FW_END + 3) << left << "      LINES" << setw(FW_NAME) << "NAME" << setw(FW_NODES) << "NODES";
-
-    _tableHeading = tableHeading.str();
-  }
 
 private:
   std::ostream& _os;
-  bool _compact;
-  std::string _tableHeading;
-
-  void outputTableHeading();
-  void outputElement(element& elem, bool isFunction = false);
-  void outputXml(ScopeNode * node);
-  bool ScopeToXml(XmlWriter& wrt, ScopeNode * node);
 };
 
 #endif // DISPLAY_H

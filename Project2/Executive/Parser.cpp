@@ -57,9 +57,10 @@ bool Parser::parse()
     //  std::cout << '[' << (*pTokColl)[j] << ']';
     // std::cout << std::endl;
 
-    if (rules[i]->doTest(pTokColl))
+    void *arg;
+    if ((arg = rules[i]->doTest(*pTokColl)) != NULL)
     {
-      switch (rules[i]->doActions(pTokColl))
+      switch (rules[i]->doActions(*pTokColl, arg))
       {
       case IAction::ACT_SUCC_CONT:
         succeeded = true;
@@ -74,6 +75,16 @@ bool Parser::parse()
       }
     }
   }
+
+#if 0
+  if (succeeded == false) {
+    for (int i = 0 ; i < (*pTokColl).length() ; i++)
+    {
+      std::cout << (*pTokColl)[i] << std::endl;
+    }
+   }
+#endif
+
   return succeeded;
 }
 //----< register action with a rule >--------------------------
@@ -84,7 +95,7 @@ void IRule::addAction(IAction *pAction)
 }
 //----< invoke all actions associated with a rule >------------
 
-IAction::ActionStatus IRule::doActions(ITokCollection*& pTokColl)
+IAction::ActionStatus IRule::doActions(ITokCollection& tc, void *arg)
 {
   IAction::ActionStatus status = IAction::ACT_SUCC_CONT;
 
@@ -92,7 +103,7 @@ IAction::ActionStatus IRule::doActions(ITokCollection*& pTokColl)
   {
     for (size_t i = 0; i < actions.size(); ++i)
     {
-      status = actions[i]->doAction(pTokColl);
+      status = actions[i]->doAction(tc, arg);
 
       if (status == IAction::ACT_FAIL_STOP || status == IAction::ACT_SUCC_STOP)
         break;

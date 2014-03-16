@@ -56,15 +56,43 @@ ver 1.0 : 12 Feb 2014
 
 #include "ITokCollection.h"
 
+class CPPRule : public IRule
+{
+public:
+  enum ExprType {
+    EXPR_UNKNOWN = 0,
+    EXPR_PREPROC,
+    EXPR_SCOPE_OPEN,
+    EXPR_NAMESPACE,
+    EXPR_CLASS,
+    EXPR_STRUCT,
+    EXPR_UNION,
+    EXPR_TEMPLATE,
+    EXPR_ENUM,
+    EXPR_FUNCTION,
+    EXPR_IF,
+    EXPR_ELSE,
+    EXPR_WHILE,
+    EXPR_DO,
+    EXPR_SWITCH,
+    EXPR_FOR,
+    EXPR_TRY,
+    EXPR_CATCH,
+    EXPR_SCOPE_CLOSE,
+    EXPR_MAX
+  };
+};
+
 ///////////////////////////////////////////////////////////////
 // rule to detect beginning of anonymous scope
 
-class BeginningOfScope : public IRule
+class BeginningOfScope : public CPPRule
 {
 public:
-  bool doTest(ITokCollection*& pTc)
+  void * doTest(ITokCollection& tc)
   {
-    return (pTc->find("{") < pTc->length());
+    size_t pos = tc.find("{");
+    return (void*) ((pos < tc.length()) ? EXPR_SCOPE_OPEN : EXPR_UNKNOWN);
   }
 
 };
@@ -72,28 +100,26 @@ public:
 ///////////////////////////////////////////////////////////////
 // rule to detect end of scope
 
-class EndOfScope : public IRule
+class EndOfScope : public CPPRule
 {
 public:
-  bool doTest(ITokCollection*& pTc)
+  void * doTest(ITokCollection& tc)
   {
-    return (pTc->find("}") < pTc->length());
+    size_t pos = tc.find("}");
+    return (void*)((pos < tc.length()) ? EXPR_SCOPE_CLOSE : EXPR_UNKNOWN);
   }
 };
 
 ///////////////////////////////////////////////////////////////
 // rule to detect preprocessor statements
 
-class PreprocStatement : public IRule
+class PreprocStatement : public CPPRule
 {
 public:
-  bool doTest(ITokCollection*& pTc)
+  void *doTest(ITokCollection& tc)
   {
-    if (pTc->find("#") < pTc->length())
-    {
-      return true;
-    }
-    return false;
+    size_t pos = tc.find("#");
+    return (void*)((pos < tc.length()) ? EXPR_PREPROC : EXPR_UNKNOWN);
   }
 };
 
@@ -101,13 +127,15 @@ public:
 ///////////////////////////////////////////////////////////////
 // rule to detect template
 
-class TemplateDefinition : public IRule
+class TemplateDefinition : public CPPRule
 {
 public:
-  bool doTest(ITokCollection*& pTc)
+  void * doTest(ITokCollection& tc)
   {
-    ITokCollection& tc = *pTc;
-    return (tc[tc.length() - 1] == "{") && (tc[0] == "template");
+    if ((tc[tc.length() - 1] == "{") && (tc[0] == "template"))
+      return (void*) EXPR_SCOPE_CLOSE;
+    
+    return (void*) EXPR_UNKNOWN;
   }
 };
 
@@ -115,77 +143,82 @@ public:
 ///////////////////////////////////////////////////////////////
 // rule to detect enclosure definitions - namespace, class, struct, union
 
-class EnclosureDefinition : public IRule
+class EnclosureDefinition : public CPPRule
 {
 public:
-  bool isEnclosure(const std::string& tok)
+  void * isEnclosure(const std::string& tok)
   {
     const static std::string keys[]
       = { "namespace", "class", "struct", "union" };
+    const static ExprType types[]
+      = { EXPR_NAMESPACE, EXPR_CLASS, EXPR_STRUCT, EXPR_UNION };
+
     for (int i = 0; i < (sizeof(keys) / sizeof(keys[0])); ++i)
     {
       if (tok == keys[i])
-        return true;
+        return (void*) types[i];
     }
-    return false;
+    return NULL;
   }
 
-  bool doTest(ITokCollection*& pTc)
+  void * doTest(ITokCollection& tc)
   {
-    // std::cout << "Test Enc" << std::endl;
-    ITokCollection& tc = *pTc;
     if (tc[tc.length() - 1] == "{")
     {
       return isEnclosure(tc[0]);
     }
 
-    return false;
+    return NULL;
   }
 };
 
 ///////////////////////////////////////////////////////////////
 // rule to detect enum
 
-class EnumDefinition : public IRule
+class EnumDefinition : public CPPRule
 {
 public:
-  bool doTest(ITokCollection*& pTc)
+  void * doTest(ITokCollection& tc)
   {
-    ITokCollection& tc = *pTc;
-    return (tc[tc.length() - 1] == "{") && tc.length() >= 3 && 
-           ( tc[tc.length() - 3] == "enum") ;
+    if ((tc[tc.length() - 1] == "{") && tc.length() >= 3 &&
+      (tc[tc.length() - 3] == "enum")) {
+      return (void*) EXPR_ENUM;
+    }
+
+    return NULL;
   }
 };
 
 ///////////////////////////////////////////////////////////////
 // rule to detect function definitions
 
-class SpecialKeyword : public IRule
+class SpecialKeyword : public CPPRule
 {
 public:
-  bool isSpecialKeyWord(const std::string& tok)
+  void * isSpecialKeyWord(const std::string& tok)
   {
     const static std::string keys[]
-      = { "for", "while", "switch", "if", "try" "catch" };
+      = { "for", "while", "switch", "if", "try", "catch", "do" };
+    const static ExprType types[]
+      = { EXPR_FOR, EXPR_WHILE, EXPR_SWITCH, EXPR_IF, EXPR_TRY, EXPR_CATCH, EXPR_DO };
 
     for (int i = 0; i < (sizeof(keys) / sizeof(keys[0])); ++i)
     {
       if (tok == keys[i])
-        return true;
+        return (void*) types[i];
     }
-    return false;
+    return NULL;
   }
 
-  bool doTest(ITokCollection*& pTc)
+  void * doTest(ITokCollection& tc)
   {
-    ITokCollection& tc = *pTc;
     if (tc[tc.length() - 1] == "{")
     {
       size_t len = tc.find("(");
       if (len < tc.length())
         return isSpecialKeyWord(tc[len - 1]);
     }
-    return false;
+    return NULL;
   }
 };
 
@@ -193,7 +226,7 @@ public:
 ///////////////////////////////////////////////////////////////
 // rule to detect special keywords like for, while, switch, if, try or catch
 
-class FunctionDefinition : public IRule
+class FunctionDefinition : public CPPRule
 {
 public:
   bool isSpecialKeyWord(const std::string& tok)
@@ -209,18 +242,17 @@ public:
     return false;
   }
 
-  bool doTest(ITokCollection*& pTc)
+  void * doTest(ITokCollection& tc)
   {
-    ITokCollection& tc = *pTc;
     if (tc[tc.length() - 1] == "{")
     {
       size_t len = tc.find("(");
       if (len < tc.length() && !isSpecialKeyWord(tc[len - 1]))
       {
-        return true;
+        return (void*) EXPR_FUNCTION;
       }
     }
-    return false;
+    return NULL;
   }
 };
 
