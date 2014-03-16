@@ -53,15 +53,19 @@ void Display::ShowMatches(const SizedScopeList& scopelist)
     {
       DisplayLine('-');
       DisplayFile(*(l->file), l->start, l->lines);
+      _os << endl;
     }
     _os << *(r->file) << " : " << r->start << "-" << (r->start + r->lines) << endl;
     if (_showDiff)
     {
       DisplayLine('-');
       DisplayFile(*(r->file), r->start, r->lines);
+      _os << endl;
     }
 
     DisplayLine('=');
+    _os << endl << endl;
+
     if (_showDiff)
       PauseForUser();
   }
