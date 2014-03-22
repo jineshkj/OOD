@@ -85,6 +85,7 @@
     <ClCompile Include="CLIOptions.cpp" />
     <ClCompile Include="CLIParser.cpp" />
     <ClCompile Include="CPPParser.cpp" />
+    <ClCompile Include="CPPRule.cpp" />
     <ClCompile Include="Display.cpp" />
     <ClCompile Include="Executive.cpp" />
     <ClCompile Include="FileManager.cpp" />

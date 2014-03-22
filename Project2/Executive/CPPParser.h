@@ -40,6 +40,7 @@ struct ScopeInfo
 
   int type;
   size_t start, lines, size;
+  std::string signature;
   const std::string* file;
 
   ScopeInfo *parent;
@@ -49,7 +50,7 @@ struct ScopeInfo
 
 inline std::ostream& operator<<(std::ostream& os, const ScopeInfo& si)
 {
-  return (os << *(si.file) << ": Type: " << si.type << " Start: " << si.start << " Lines: " << si.lines << " Size: " << si.size << " Parent: " << (si.parent ? si.parent->start : 0));
+  return (os << *(si.file) << ": Type: " << si.signature << " Start: " << si.start << " Lines: " << si.lines << " Size: " << si.size << " Parent: " << (si.parent ? si.parent->start : 0));
 }
 
 ///////////////////////////////////////////////////////////////
@@ -139,8 +140,11 @@ public:
 
     _repo._scopes.push(scope);
 
+    const char typeChar = CPPRule::getTypeChar((CPPRule::ExprType) scope->type);
+
     while (scope != NULL) {
       scope->size += tc.length(); // size of a scope is the number of token contained in it
+      scope->signature += typeChar;
       scope = scope->parent; // propagate the size to parent
     }
 
@@ -174,8 +178,11 @@ public:
 
     _repo._scopes.push(scope);
 
+    const char typeChar = CPPRule::getTypeChar((CPPRule::ExprType) scope->type);
+
     while (scope != NULL) {
       scope->size += tc.length(); // size of a scope is the number of token contained in it
+      scope->signature += typeChar;
       scope = scope->parent; // propagate the size to parent
     }
 
@@ -205,8 +212,11 @@ public:
 
     _repo._scopes.push(scope);
 
+    const char typeChar = CPPRule::getTypeChar((CPPRule::ExprType) scope->type);
+
     while (scope != NULL) {
       scope->size += tc.length(); // size of a scope is the number of token contained in it
+      scope->signature += typeChar;
       scope = scope->parent; // propagate the size to parent
     }
 
@@ -236,8 +246,11 @@ public:
 
     _repo._scopes.push(scope);
 
+    const char typeChar = CPPRule::getTypeChar((CPPRule::ExprType) scope->type);
+
     while (scope != NULL) {
       scope->size += tc.length(); // size of a scope is the number of token contained in it
+      scope->signature += typeChar;
       scope = scope->parent; // propagate the size to parent
     }
 
@@ -267,8 +280,11 @@ public:
 
     _repo._scopes.push(scope);
 
+    const char typeChar = CPPRule::getTypeChar((CPPRule::ExprType) scope->type);
+
     while (scope != NULL) {
       scope->size += tc.length(); // size of a scope is the number of token contained in it
+      scope->signature += typeChar;
       scope = scope->parent; // propagate the size to parent
     }
 
@@ -298,8 +314,11 @@ public:
 
     _repo._scopes.push(scope);
 
+    const char typeChar = CPPRule::getTypeChar((CPPRule::ExprType) scope->type);
+
     while (scope != NULL) {
       scope->size += tc.length(); // size of a scope is the number of token contained in it
+      scope->signature += typeChar;
       scope = scope->parent; // propagate the size to parent
     }
 
@@ -337,8 +356,11 @@ public:
     scope->lines = _repo._toker.lines() - scope->start + 1;
     _repo._work->scopes.push_back(scope);
 
+    // const char typeChar = CPPRule::getTypeChar((CPPRule::ExprType) scope->type);
+
     while (scope != NULL) {
       scope->size += tc.length(); // size of a scope is the number of token contained in it
+      // scope->signature += typeChar;
       scope = scope->parent; // propagate the size to parent
     }
 
@@ -382,8 +404,11 @@ public:
 
     // NOTE: no need to push this to scope stack as there are no inner scopes
 
+    const char typeChar = CPPRule::getTypeChar((CPPRule::ExprType) scope->type);
+
     while (scope != NULL) {
       scope->size += tc.length(); // size of a scope is the number of token contained in it
+      scope->signature += typeChar;
       scope = scope->parent; // propagate the size to parent
     }
 

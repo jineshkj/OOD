@@ -39,8 +39,12 @@ public:
     ScopeList& sl = _scopes[scope->size];
     for (auto& match : sl)
     {
-      // for all the scopes with same size, we add a match
-      _matches.push_back(ScopeMatch(scope, match));
+      // for all the scopes with same size and signature, we add a match
+      if (scope->signature == match->signature)
+      {
+        // std::cout << *scope << std::endl << *match << std::endl << std::endl;
+        _matches.push_back(ScopeMatch(scope, match));
+      }
     }
     sl.push_back(scope);
     _lock.unlock();
