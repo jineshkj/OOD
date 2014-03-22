@@ -54,6 +54,7 @@ ver 1.0 : 12 Feb 2014
 
 #include <string>
 
+#include "Parser.h"
 #include "ITokCollection.h"
 
 ///////////////////////////////////////////////////////////////
@@ -61,8 +62,10 @@ ver 1.0 : 12 Feb 2014
 
 class CPPRule : public IRule
 {
+  static const char ExprTypeChar[];
+
 public:
-  enum ExprType {
+  enum ExprType { // Tightly linked to ExprTypeChar
     EXPR_UNKNOWN = 0,
     EXPR_PREPROC,
     EXPR_SCOPE_OPEN,
@@ -85,6 +88,8 @@ public:
     EXPR_MISC,
     EXPR_MAX
   };
+
+  static char getTypeChar(ExprType type) { return ExprTypeChar[type]; }
 };
 
 ///////////////////////////////////////////////////////////////
