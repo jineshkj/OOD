@@ -39,6 +39,9 @@ ver 1.0 : 12 Feb 2014
 
 #include <iostream>
 
+#include "CLIOptions.h"
+#include "FileManager.h"
+
 #include "Display.h"
 
 class Executive
@@ -52,6 +55,9 @@ private:
   int _argc;
   char **_argv;
   Display _disp;
+
+  size_t parseAndAnalyze(const CLIOptions& opts, const FileManager& filemgr);
+  void displayResults(const CLIOptions& opts);
 };
 
 #endif // EXECUTIVE_H

@@ -47,7 +47,7 @@ int Executive::run()
   {
     _disp.PrintUsage();
     return -1;
-  }    
+  }
   
   _disp.PauseForUser();
 
@@ -58,6 +58,31 @@ int Executive::run()
 
   high_resolution_clock::time_point start_time = high_resolution_clock::now();
 
+  size_t total_scopes = parseAndAnalyze(options, manager);
+
+  high_resolution_clock::time_point end_time = high_resolution_clock::now();
+
+  size_t total_matches = 0;
+  for (int type = 0; type < CPPRule::EXPR_MAX; type++)
+  {
+    const SizedScopeList& sl = ScopeAnalyzer::GetSizedScopeList(type);
+    total_matches += sl.matches().size();
+  }
+
+  milliseconds ms = duration_cast<milliseconds>(end_time - start_time);
+
+  _disp.stream() << "Analyzed " << total_scopes << " scopes and found " << total_matches << " matches in " << ms.count() << " milliseconds" << std::endl;
+  _disp.PauseForUser();
+
+  displayResults(options);
+
+  return 0;
+}
+
+//----< parse and analyze source files >------------
+
+size_t Executive::parseAndAnalyze(const CLIOptions& opts, const FileManager& filemgr)
+{
   CPPParser sampleparser;
   WorkerPool parserpool(&sampleparser);
   SlabAllocator<ParseFile> parseAlloc;
@@ -65,10 +90,10 @@ int Executive::run()
   ScopeAnalyzer sampleAnalyzer;
   WorkerPool analyzerpool(&sampleAnalyzer);
 
-  ScopeAnalyzer::SetMinLines(options.minLines());
-  
+  ScopeAnalyzer::SetMinLines(opts.minLines());
+
   size_t total_scopes = 0;
-  for (auto &file : manager.repo())
+  for (auto &file : filemgr.repo())
   {
     ParseFile *work = parseAlloc.alloc();
 
@@ -89,29 +114,17 @@ int Executive::run()
 
   while (analyzerpool.wait() != NULL); // wait until all analyzer workers are done
 
-  high_resolution_clock::time_point end_time = high_resolution_clock::now();
+  return total_scopes;
+}
 
-  size_t total_matches = 0;
-  for (int type = 0; type < CPPRule::EXPR_MAX; type++)
-  {
-    const SizedScopeList& sl = ScopeAnalyzer::GetSizedScopeList(type);
-    total_matches += sl.matches().size();
-  }
-
-  milliseconds ms = duration_cast<milliseconds>(end_time - start_time);
-
-  _disp.stream() << "Analyzed " << total_scopes << " scopes and found " << total_matches << " matches in " << ms.count() << " milliseconds" << std::endl;
-  _disp.PauseForUser();
-
-  _disp.ShowDiff(options.showdiff());
+//----< display analyzed results >------------
+void Executive::displayResults(const CLIOptions& opts)
+{
+  _disp.ShowDiff(opts.showdiff());
 
   for (int type = 0; type < CPPRule::EXPR_MAX; type++)
   {
     const SizedScopeList& sl = ScopeAnalyzer::GetSizedScopeList(type);
     _disp.ShowMatches(sl);
   }
-
-  //_disp.PauseForUser();
-
-  return 0;
 }
