@@ -230,9 +230,10 @@ public:
   {
     if (tc[tc.length() - 1] == "{")
     {
-      size_t len = tc.find("(");
-      if (len < tc.length())
-        return isSpecialKeyWord(tc[len - 1]);
+      return isSpecialKeyWord(tc[0]);
+      //size_t len = tc.find("(");
+      //if (len < tc.length())
+      //  return isSpecialKeyWord(tc[len - 1]);
     }
     return NULL;
   }
