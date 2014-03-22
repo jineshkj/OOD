@@ -14,8 +14,9 @@ void codeFoldingRules::MergeForCollections(ITokCollection*& pTc)
 {
   // have for(int i=0;
   size_t posParen = pTc->find(")");
-  size_t posColon = pTc->find(":");
-  if(posParen != posColon + 2)
+  size_t posSemiColon = pTc->find(";");
+
+  if (posSemiColon < posParen)
   {
     pTc->get(false);  // get i<N;
     pTc->get(false);  // get ++i) {

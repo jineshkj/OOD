@@ -6,7 +6,8 @@
 //  Language:      Visual C++ 2010, SP1                            //
 //  Platform:      Dell Precision T7400, Win 7 Pro SP1             //
 //  Application:   Code Analysis Research                          //
-//  Author:        Jim Fawcett, CST 4-187, Syracuse University     //
+//  Author:        Jinesh Jayakumar <jkunnath@syr.edu>             //
+//  Source:        Jim Fawcett, CST 4-187, Syracuse University     //
 //                 (315) 443-3948, jfawcett@twcny.rr.com           //
 /////////////////////////////////////////////////////////////////////
 /*
@@ -38,6 +39,8 @@
 
   Maintenance History:
   ====================
+  ver 1.2 : 21 Mar 14
+  - modified FoldingRules.cpp to only fold for() with semicolon in between
   ver 1.1 : 10 Feb 13
   - modified FoldingRules.cpp to avoid folding for(auto x : C) {
   ver 1.0 : 02 Jan 11
