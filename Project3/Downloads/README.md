@@ -1,0 +1,1 @@
+This directory contains all files downloaded by FileTransfer NetJoin service.
