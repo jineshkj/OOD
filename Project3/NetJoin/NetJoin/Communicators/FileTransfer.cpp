@@ -50,7 +50,7 @@ void FileTransfer::PutFile::WriteMessage(Message& msg) const
 {
   msg.AddHeader("FileName", _fname); // this should do all the time
 
-  std::ifstream file(_path);
+  std::ifstream file(_path, std::ios_base::out | std::ios_base::binary);
 
   if (!file.is_open())
     throw "Could not open file " + _path;
@@ -73,7 +73,7 @@ void FileTransfer::PutFile::ReadMessage(Message& msg)
   {
     _fname = msg.Headers()["FileName"];
 
-    std::ofstream file(_path, std::ios_base::out | std::ios_base::trunc);
+    std::ofstream file(_path, std::ios_base::out | std::ios_base::trunc | std::ios_base::binary);
     file << msg.Data();
   }
   else if (msg.Cmd() == "Status") // Read response message
