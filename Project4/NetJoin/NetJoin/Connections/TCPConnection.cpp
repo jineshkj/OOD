@@ -146,7 +146,8 @@ Message * TCPConnection::RecvData(Message *m)
   if (cl != m->Headers().end())
   {
     const int data_size = atoi(cl->second.c_str());
-    char buffer[1500];
+    std::cout << "DataSize : " << data_size << std::endl;
+    char buffer[4096];
 
     int count = 0;
     while (count < data_size)
