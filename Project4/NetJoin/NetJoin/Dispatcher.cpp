@@ -14,6 +14,7 @@
 
 #include "Listeners/TCPListener.h"
 #include "Communicators/FileTransfer.h"
+#include "Communicators/TextSearch.h"
 
 #include <iostream>
 
@@ -31,6 +32,7 @@ Dispatcher::Dispatcher(int lport)
   _listener = new TCPListener(lport, _msgQ);
 
   RegisterCommunicator(new FileTransfer(_msgQ));
+  RegisterCommunicator(new TextSearch(_msgQ));
 
   _thr = new std::thread(Dispatcher::ThreadEntry, std::ref(*this));
 }
@@ -100,7 +102,7 @@ void Dispatcher::Run()
     if (m == 0) // shutdown signal received
       break;
 
-    std::cout << "Dispatcher received " << ((m->Dir() == Message::In)?"IN":"OUT") << " message " << m->Cmd() << std::endl;
+    //std::cout << "Dispatcher received " << ((m->Dir() == Message::In)?"IN":"OUT") << " message " << m->Cmd() << std::endl;
 
     Process(m);
   }

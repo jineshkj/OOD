@@ -73,7 +73,7 @@ void FileTransfer::PutFile::ReadMessage(Message& msg)
   {
     _fname = msg.Headers()["FileName"];
 
-    std::ofstream file(_path, std::ios_base::out | std::ios_base::trunc);
+    std::ofstream file(_path, std::ios_base::out | std::ios_base::trunc | std::ios_base::binary);
     file << msg.Data();
   }
   else if (msg.Cmd() == "Status") // Read response message

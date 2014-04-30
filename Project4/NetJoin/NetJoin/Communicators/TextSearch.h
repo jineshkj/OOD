@@ -69,6 +69,7 @@ namespace NetJoin {
 
       TextSearch *_svc;
       BlockingQueue<std::string*> _files;
+      BlockingQueue<std::string*> _matches;
       std::atomic<int> _completed;
     };
 

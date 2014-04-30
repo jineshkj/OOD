@@ -16,6 +16,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <algorithm>
 
 #include "../Message.h"
 #include "../StatusMessage.h"
@@ -118,11 +119,13 @@ void TextSearch::ProcessCompletedSearch(SearchString *ss)
   if (ss->_completed != ss->_jobs)  // ensure all jobs have been completed
     return;
 
-  std::cout << "Search Completed" << std::endl;
+  //std::cout << "Search Completed" << std::endl;
 
-  //StatusMessage * resp = new StatusMessage(status);
-  //resp->SetConn(cmd->Msg().Conn());
-  //Dispatch(resp);
+  StatusMessage * resp = new StatusMessage(true);
+  resp->SetConn(ss->Msg().Conn());
+  Dispatch(resp);
+
+  delete ss;
 }
 
 
@@ -183,9 +186,44 @@ void TextSearch::SearchThread(SearchString *ss)
 
   while ((file = ss->_files.deQ()) != 0) // loop until termination entry
   {
-    std::cout << "Processing file : " << *file << std::endl;
+    //std::cout << "Processing file : " << *file << std::endl;
+
+    std::ostringstream matchInfo;
+    matchInfo << FileSystem::Path::getName(*file) << ':';
+
+    std::ifstream fs(*file, std::ios::in | std::ios::binary);
+
+    if (!fs.is_open())
+      throw "Could not open file " + *file;
+  
+    char buffer[4096];
+    std::ostringstream content;
+    while (!fs.eof())
+    {
+      fs.read(buffer, sizeof(buffer));
+      content.write(buffer, fs.gcount());
+    }
+
+    std::string text = content.str();
+
+    std::string::iterator i, curr;
+
+    curr = text.begin();
+    while ((i = std::search(curr, text.end(), ss->_str.begin(), ss->_str.end())) != text.end())
+    {
+      //std::cout << "i = " << (i-text.begin()) << std::endl;
+      matchInfo << ' ' << (i - text.begin());
+      curr = i;
+      curr++;
+    }
+
+    ss->_matches.enQ(new std::string(matchInfo.str()));
+
     delete file;
   }
+
+  ss->_completed++;
+  ss->_matches.enQ(0);
 
   ss->_svc->ProcessCompletedSearch(ss);
 }

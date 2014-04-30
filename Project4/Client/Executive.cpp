@@ -85,4 +85,24 @@ void Executive::runPutFile()
 
 void Executive::runSearchString()
 {
+  std::string str = _arg;
+
+  for (int i = 0; i < _iters; i++)
+  {
+    NetJoin::TextSearch::SearchString cmd(str);
+
+    try {
+      NetJoin::Service::Execute(cmd);
+    }
+    catch (std::exception e)
+    {
+      std::cout << "Error : " << e.what() << std::endl;
+      exit(-1);
+    }
+
+    if (cmd.status() == NetJoin::Command::SUCCEEDED)
+      std::cout << "Search succeeded" << std::endl;
+    else
+      std::cout << "Search failed" << std::endl;
+  }
 }

@@ -45,7 +45,7 @@ void TCPConnection::Close()
 
 bool TCPConnection::Send(Message *m)
 {
-  std::cout << "Sending message " << m->Cmd() << " to TCPConnection" << std::endl;
+  //std::cout << "Sending message " << m->Cmd() << " to TCPConnection" << std::endl;
 
   std::lock_guard<std::mutex> lk(_slock);
 
@@ -102,7 +102,7 @@ Message * TCPConnection::Recv()
 
   m->SetConn(this);
 
-  std::cout << "Received message " << m->Cmd() << " from TCPConnection" << std::endl;
+  //std::cout << "Received message " << m->Cmd() << " from TCPConnection" << std::endl;
 
   return m;
 }
@@ -146,7 +146,7 @@ Message * TCPConnection::RecvData(Message *m)
   if (cl != m->Headers().end())
   {
     const int data_size = atoi(cl->second.c_str());
-    std::cout << "DataSize : " << data_size << std::endl;
+    
     char buffer[4096];
 
     int count = 0;
