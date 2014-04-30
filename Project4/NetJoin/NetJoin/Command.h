@@ -42,6 +42,8 @@
 * - first release
 */
 
+#include <chrono>
+
 #include "Message.h"
 #include "BlockingQueue.h"
 
@@ -65,7 +67,8 @@ public:
 
   //----< Command class constructor >--------------
 
-  Command(const std::string& name, Message *m=0) : _name(name), _status(CREATED), _msg(m) { }
+  Command(const std::string& name, Message *m=0) : _name(name), 
+    _status(CREATED), _msg(m), _create_time(std::chrono::high_resolution_clock::now()) { }
 
   //----< Command class destructor >--------------
 
@@ -112,14 +115,35 @@ public:
     return *_msg;
   }
 
-  virtual void WriteMessage(Message& msg) const = 0;
-  virtual void ReadMessage(Message& msg) = 0;
+  void HandleResponse(Message& m)
+  {
+    ReadMessage(m);
+
+    if (m.Cmd() == "Status") // Get status
+    {
+      if (m.Headers()["Success"] == "True")
+        _status = Command::SUCCEEDED;
+      else
+        _status = Command::FAILED;
+    }
+  }
+
+  //----< get associated message buffer >--------------
+
+  const std::chrono::high_resolution_clock::time_point& CreateTime() const 
+  {
+    return _create_time;
+  }
 
 private:
   const std::string _name;
   Status _status;
 
   Message *_msg;
+  std::chrono::high_resolution_clock::time_point _create_time;
+
+  virtual void ReadMessage(Message& msg) = 0;
+  virtual void WriteMessage(Message& msg) const = 0;
 };
 
 using CommandQueue = BlockingQueue<Command*>;

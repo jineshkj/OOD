@@ -45,11 +45,27 @@ TextSearch::SearchString::SearchString(const std::string& str, int jobs) : Comma
     _jobs = MAX_JOBS;
 }
 
+//----< destructor for SearchString class >--------------
+
+TextSearch::SearchString::~SearchString()
+{
+  while (_files.size())
+  {
+    delete _files.deQ();
+  }
+
+  while (_matches.size())
+  {
+    delete _matches.deQ();
+  }
+}
+
 //----< copy SearchString data to a Message object >--------------
 
 void TextSearch::SearchString::WriteMessage(Message& msg) const
 {
   msg.AddHeader("SearchString", _str); // this should do all the time
+  msg.AddHeader("NumJobs", _jobs);
 }
 
 //----< populate SearchString data from a Message object >--------------
@@ -61,16 +77,19 @@ void TextSearch::SearchString::ReadMessage(Message& msg)
   if (msg.Cmd() == "SearchString")
   {
     _str = msg.Headers()["SearchString"];
+    _jobs = atoi(msg.Headers()["NumJobs"].c_str());
   }
   else if (msg.Cmd() == "Status") // Read response message
   {
-    if (msg.Headers()["Success"] == "True")
-      status() = Command::SUCCEEDED;
-    else
-      status() = Command::FAILED;
-
-    // TODO: read ExecutionTime from header
-    // TODO: Read message body and get response data
+    std::istringstream data(msg.Data());
+    
+    while (!data.eof())
+    {
+      std::string line;
+      std::getline(data, line);
+      _matches.enQ(new std::string(line));
+    }
+    
   }
 }
 
@@ -123,6 +142,19 @@ void TextSearch::ProcessCompletedSearch(SearchString *ss)
 
   StatusMessage * resp = new StatusMessage(true);
   resp->SetConn(ss->Msg().Conn());
+
+  std::chrono::milliseconds ms = 
+    std::chrono::duration_cast<std::chrono::milliseconds>(resp->CreateTime() - ss->CreateTime());
+
+  resp->AddHeader("ExecutionTime", ms.count());
+  while (ss->_matches.size())
+  {
+    std::string *match = ss->_matches.deQ();
+    resp->WriteData(match->c_str(), match->size());
+    resp->WriteData("\n", 1);
+    delete match;
+  }
+
   Dispatch(resp);
 
   delete ss;
@@ -223,7 +255,7 @@ void TextSearch::SearchThread(SearchString *ss)
   }
 
   ss->_completed++;
-  ss->_matches.enQ(0);
+  // ss->_matches.enQ(0);
 
   ss->_svc->ProcessCompletedSearch(ss);
 }

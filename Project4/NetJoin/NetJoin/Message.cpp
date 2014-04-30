@@ -18,7 +18,8 @@ using namespace NetJoin;
 
 //----< Message constructror >--------------
 
-Message::Message(Direction d, const std::string& cmdline, void *owner) : _dir(d), _owner(owner), _conn(0)
+Message::Message(Direction d, const std::string& cmdline, void *owner) : _dir(d), _owner(owner), _conn(0), 
+  _create_time(std::chrono::high_resolution_clock::now())
 {
   // std::cout << "Cmdline: " << cmdline << std::endl;
 

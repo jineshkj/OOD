@@ -86,6 +86,9 @@ Message * TCPConnection::Recv()
   if (cmdline.size() == 0)
     return 0;
 
+  // We create message only after receiving first response line from the
+  // server. This is important to have correct timestamp of Message object
+  // which could later be used for calculating the roundtrip time
   Message *m = new Message(Message::In, cmdline);
 
   if (m->CommandLine().size() == 0)

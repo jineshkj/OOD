@@ -53,6 +53,7 @@
 #include <map>
 #include <string>
 #include <sstream>
+#include <chrono>
 
 #include "BlockingQueue.h"
 
@@ -97,6 +98,14 @@ public:
 
   void AddHeader(const Property& p, const Value& v) { _headers[p] = v; }
 
+  //----< add a header to the message >--------------
+
+  void AddHeader(const Property& p, long long v)
+  {
+    std::ostringstream str; str << v;
+    AddHeader(p, str.str());
+  }
+
   //----< write to message data buffer >--------------
 
   void WriteData(const char *data, std::streamsize size) { _data.write(data, size); }
@@ -127,6 +136,11 @@ public:
 
   Connection * Conn() { return _conn; }
 
+  //----< get time of object creattion >--------------
+
+  const std::chrono::high_resolution_clock::time_point& CreateTime() const 
+  { return _create_time; }
+
 private:
   Direction _dir;
   std::string _cmd;
@@ -136,6 +150,7 @@ private:
 
   void *_owner;
   Connection *_conn;
+  std::chrono::high_resolution_clock::time_point _create_time;
 };
 
 using MessageQueue = BlockingQueue<Message*>;

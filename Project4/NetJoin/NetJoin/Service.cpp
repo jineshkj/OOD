@@ -60,7 +60,7 @@ void Service::Wait()
 
 //----< execute a command on remote host >--------------
 
-void Service::Execute(Command& cmd, const std::string& host, int port)
+long long Service::Execute(Command& cmd, const std::string& host, int port)
 {
   cmd.status() = Command::EXECUTING;
 
@@ -75,8 +75,14 @@ void Service::Execute(Command& cmd, const std::string& host, int port)
   con->Send(&cmd.Msg());
 
   Message *rsp = con->Recv();
-  cmd.ReadMessage(*rsp);
+
+  long long ms;
+  std::istringstream(rsp->Headers()["ExecutionTime"]) >> ms;
+
+  cmd.HandleResponse(*rsp);
   delete rsp;
+
+  return ms;
 }
 
 #ifdef TEST_SERVICE

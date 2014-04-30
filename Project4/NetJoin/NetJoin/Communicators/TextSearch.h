@@ -57,6 +57,7 @@ namespace NetJoin {
     {
     public:
       SearchString(const std::string& str, int jobs = 1);
+      ~SearchString();
 
       void WriteMessage(Message& msg) const;
       void ReadMessage(Message& msg);

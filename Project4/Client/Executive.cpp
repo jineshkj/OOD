@@ -90,9 +90,19 @@ void Executive::runSearchString()
   for (int i = 0; i < _iters; i++)
   {
     NetJoin::TextSearch::SearchString cmd(str);
+    long long server_ms = 0;
+    std::chrono::milliseconds client_ms;
 
     try {
-      NetJoin::Service::Execute(cmd);
+      std::chrono::high_resolution_clock::time_point start_time = 
+        std::chrono::high_resolution_clock::now();
+
+      server_ms = NetJoin::Service::Execute(cmd);
+
+      std::chrono::high_resolution_clock::time_point end_time = 
+        std::chrono::high_resolution_clock::now();
+
+      client_ms = std::chrono::duration_cast<milliseconds>(end_time - start_time);
     }
     catch (std::exception e)
     {
@@ -101,8 +111,13 @@ void Executive::runSearchString()
     }
 
     if (cmd.status() == NetJoin::Command::SUCCEEDED)
+    {
       std::cout << "Search succeeded" << std::endl;
-    else
+      std::cout << "Server Duration : " << server_ms << " ms" << std::endl;
+      std::cout << "Overall Duration : " << client_ms.count() << " ms" << std::endl;
+    } else
+    {
       std::cout << "Search failed" << std::endl;
+    }
   }
 }

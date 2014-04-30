@@ -44,6 +44,8 @@
 * - first release
 */
 
+#include <chrono>
+
 #include "Config.h"
 
 #include "Dispatcher.h"
@@ -62,7 +64,7 @@ public:
 
   void Wait();
 
-  static void Execute(Command& cmd, const std::string& host = "localhost", int port = Config::DEF_PORT);
+  static long long Execute(Command& cmd, const std::string& host = "localhost", int port = Config::DEF_PORT);
 
 private:
   const Config& _cfg;
