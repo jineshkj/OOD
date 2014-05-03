@@ -24,6 +24,8 @@
 
 #include <NetJoin.h>
 
+//----< run the NetJoin server >--------------
+
 void main()
 {
   NetJoin::Config cfg; // create the default config
@@ -34,7 +36,7 @@ void main()
   }
   catch (std::exception e)
   {
-    std::cout << "Error : " << e.what() << std::endl;
+    std::cout << "Exception : " << e.what() << std::endl;
     exit(1);
   }
 }

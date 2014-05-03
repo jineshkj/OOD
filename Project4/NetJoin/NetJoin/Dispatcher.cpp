@@ -127,7 +127,7 @@ void Dispatcher::ProcessIncoming(Message *m)
   // send the message to the correct communicator
   CommandMap::iterator i = _commandMap.find(m->Cmd());
   if (i == _commandMap.end())
-    throw "No registered communicator for " + m->Cmd();
+    throw std::runtime_error("No registered communicator for " + m->Cmd());
 
   Communicator *c = i->second;
   Command *cmd = c->MsgToCmd(m);
@@ -144,7 +144,7 @@ void Dispatcher::ProcessOutgoing(Message *m)
     if (m->Owner() == 0)
       delete m;
 
-    throw "No handler present for outgoing message";
+    throw std::runtime_error("No handler present for outgoing message");
   }
 }
 

@@ -53,7 +53,7 @@ void FileTransfer::PutFile::WriteMessage(Message& msg) const
   std::ifstream file(_path, std::ios::in | std::ios::binary);
 
   if (!file.is_open())
-    throw "Could not open file " + _path;
+    throw std::runtime_error("Could not open file " + _path);
 
   char buffer[4096];
   while (!file.eof())
@@ -91,12 +91,12 @@ std::string FileTransfer::PutFile::CreateTempFile()
 {
   TCHAR szTempDirPath[MAX_PATH];
   if (GetTempPath(sizeof(szTempDirPath), szTempDirPath) == 0)
-    throw "Unable to find temporary directory";
+    throw std::runtime_error("Unable to find temporary directory");
 
   //  Generates a temporary file name. 
   TCHAR szTempFileName[MAX_PATH];
   if (GetTempFileName(szTempDirPath, TEXT("NFT"), 0, szTempFileName) == 0)
-    throw "GetTempFileName failed";
+    throw std::runtime_error("GetTempFileName failed");
 
   return (const char*)(szTempFileName);
 }
@@ -135,7 +135,7 @@ Command *FileTransfer::CreateCommand(const std::string& cmdname) const
   }
   else
   {
-    throw "FileTransfer service does not know about " + cmdname;
+    throw std::runtime_error("FileTransfer service does not know about " + cmdname);
   }
 }
 

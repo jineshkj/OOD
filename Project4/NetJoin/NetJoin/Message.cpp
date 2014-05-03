@@ -31,7 +31,7 @@ Message::Message(Direction d, const std::string& cmdline, void *owner) : _dir(d)
     cl >> prefix;
 
     if (prefix != NJ_PROTO_PREFIX)
-      throw "invalid command line";
+      throw std::runtime_error("invalid command line");
 
     cl >> _cmd;
   }

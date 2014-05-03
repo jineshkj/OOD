@@ -21,7 +21,14 @@
 *
 * Public Interface:
 * =================
+* MessageQueue inQ;
+* TextSearch svc(inQ);
 *
+* svc.Wait();
+*
+*
+* svc.EnQ(new SearchString("this is a search string"));
+* 
 * Required Files:
 * ===============
 * TextSearch.h, TextSearch.cpp

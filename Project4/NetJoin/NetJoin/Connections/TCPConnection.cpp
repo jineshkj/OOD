@@ -94,7 +94,7 @@ Message * TCPConnection::Recv()
   if (m->CommandLine().size() == 0)
   {
     delete m;
-    throw "Invalid message command line received";
+    throw std::runtime_error("Invalid message command line received");
   }
 
   if ((m = RecvHeaders(m)) == 0)

@@ -15,6 +15,8 @@
 
 #include "Executive.h"
 
+//----< run the client application >--------------
+
 int main(int argc, char *argv[])
 {
   Executive exec(argc, argv);

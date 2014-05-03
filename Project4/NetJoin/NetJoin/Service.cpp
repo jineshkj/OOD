@@ -33,10 +33,10 @@ Service::Service(const Config& c) : _cfg(c), _dispatcher(0)
     break;
 
   case Config::Udp:
-    throw "UDP network protocol not supported";
+    throw std::runtime_error("UDP network protocol not supported");
 
   default:
-    throw "Configured network protocol not recognized";
+    throw std::runtime_error("Configured network protocol not recognized");
   }
 }
 
@@ -69,7 +69,7 @@ long long Service::Execute(Command& cmd, const std::string& host, int port)
   if (!con->Open())
   {
     delete con;
-    throw "Could not connect to " + host;
+    throw std::runtime_error("Could not connect to " + host);
   }
 
   con->Send(&cmd.Msg());

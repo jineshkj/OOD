@@ -42,15 +42,25 @@ _argc(argc), _argv(argv)
 
 int Executive::run()
 {
+  std::chrono::high_resolution_clock::time_point start_time =
+    std::chrono::high_resolution_clock::now();
+
   if (_cmd == "PutFile")
     runPutFile();
   else if (_cmd == "SearchString")
     runSearchString();
 
-  //_disp.PauseForUser();
+  std::chrono::high_resolution_clock::time_point end_time =
+    std::chrono::high_resolution_clock::now();
+
+  std::chrono::milliseconds total_ms;
+  total_ms = std::chrono::duration_cast<milliseconds>(end_time - start_time);
+  std::cout << "--- Overall Duration : " << total_ms.count() << " ms ---" << std::endl;
 
   return 0;
 }
+
+//----< print program usage >--------------
 
 void Executive::usage()
 {
@@ -59,6 +69,8 @@ void Executive::usage()
   std::cout << "    PutFile <filename>" << std::endl;
   std::cout << "    SearchString <string>" << std::endl;
 }
+
+//----< PutFile action handler >--------------
 
 void Executive::runPutFile()
 {
@@ -73,7 +85,7 @@ void Executive::runPutFile()
   }
   catch (std::exception e)
   {
-    std::cout << "Error : " << e.what() << std::endl;
+    std::cout << "Exception : " << e.what() << std::endl;
     exit(-1);
   }
 
@@ -83,23 +95,31 @@ void Executive::runPutFile()
     std::cout << "File transfer failed" << std::endl;
 }
 
+//----< SearchString action handler >--------------
+
 void Executive::runSearchString()
 {
   std::string str = _arg;
+  std::chrono::milliseconds client_ms;
+
+  if (str.size() == 0)
+  {
+    std::cout << "Search string empty. Aborting search." << std::endl;
+    return;
+  }
 
   for (int i = 0; i < _iters; i++)
   {
-    NetJoin::TextSearch::SearchString cmd(str);
+    NetJoin::TextSearch::SearchString cmd(str, _threads);
     long long server_ms = 0;
-    std::chrono::milliseconds client_ms;
 
     try {
-      std::chrono::high_resolution_clock::time_point start_time = 
+      std::chrono::high_resolution_clock::time_point start_time =
         std::chrono::high_resolution_clock::now();
 
       server_ms = NetJoin::Service::Execute(cmd);
 
-      std::chrono::high_resolution_clock::time_point end_time = 
+      std::chrono::high_resolution_clock::time_point end_time =
         std::chrono::high_resolution_clock::now();
 
       client_ms = std::chrono::duration_cast<milliseconds>(end_time - start_time);
@@ -112,12 +132,13 @@ void Executive::runSearchString()
 
     if (cmd.status() == NetJoin::Command::SUCCEEDED)
     {
-      std::cout << "Search succeeded" << std::endl;
-      std::cout << "Server Duration : " << server_ms << " ms" << std::endl;
-      std::cout << "Overall Duration : " << client_ms.count() << " ms" << std::endl;
-    } else
+      std::cout << "Search succeeded:" << std::endl;
+      std::cout << "  Server Duration = " << server_ms << " ms" << std::endl;
+      std::cout << "  Client Duration = " << client_ms.count() << " ms" << std::endl;
+    }
+    else
     {
-      std::cout << "Search failed" << std::endl;
+      std::cout << "*** Search failed ***" << std::endl;
     }
   }
 }

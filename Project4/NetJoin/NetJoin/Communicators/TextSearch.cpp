@@ -127,7 +127,7 @@ Command *TextSearch::CreateCommand(const std::string& cmdname) const
   }
   else
   {
-    throw "TextSearch service does not know about " + cmdname;
+    throw std::runtime_error("TextSearch service does not know about " + cmdname);
   }
 }
 
@@ -182,7 +182,7 @@ void TextSearch::Run()
 
       std::vector<std::string> files = FileSystem::Directory::getFiles(FileTransfer::SaveDir(), "*.*");
       for (auto& file : files)
-        ss->_files.enQ(new std::string(file));
+        ss->_files.enQ(new std::string(FileTransfer::SaveDir() + "\\" + file));
 
       for (int i = 0; i < ss->_jobs; i++)
       {
@@ -216,6 +216,8 @@ void TextSearch::SearchThread(SearchString *ss)
 {
   std::string *file;
 
+  std::cout << "Search worker started" << std::endl;
+
   while ((file = ss->_files.deQ()) != 0) // loop until termination entry
   {
     //std::cout << "Processing file : " << *file << std::endl;
@@ -226,7 +228,7 @@ void TextSearch::SearchThread(SearchString *ss)
     std::ifstream fs(*file, std::ios::in | std::ios::binary);
 
     if (!fs.is_open())
-      throw "Could not open file " + *file;
+      throw std::runtime_error("Could not open file " + *file);
   
     char buffer[4096];
     std::ostringstream content;
@@ -255,9 +257,9 @@ void TextSearch::SearchThread(SearchString *ss)
   }
 
   ss->_completed++;
-  // ss->_matches.enQ(0);
-
   ss->_svc->ProcessCompletedSearch(ss);
+
+  std::cout << "Search worker stopped" << std::endl;
 }
 
 #ifdef TEST_TEXTSEARCH
@@ -269,6 +271,11 @@ void main()
 
   ft.EnQ(new TextSearch::SearchString("hello"));
   Message *rsp = outQ.deQ();
+
+  std::cout << "Success = " << rsp->Headers()["Success"] << std::endl;
+
+  ft.EnQ(new TextSearch::SearchString("hello", 3));
+  rsp = outQ.deQ();
 
   std::cout << "Success = " << rsp->Headers()["Success"] << std::endl;
 }
